@@ -8,55 +8,39 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
 h1 { text-align: center; padding: 20px 20px 8px; color: #e94560; font-size: 1.8rem; }
-h2 { color: #e94560; margin-bottom: 10px; font-size: 1.2rem; }
 h3 { color: #c0c0c0; margin-bottom: 8px; font-size: 1rem; }
 
 .container { max-width: 1200px; margin: 0 auto; padding: 0 16px 40px; }
 
 .variant-bar { text-align: center; margin-bottom: 16px; }
-.variant-toggle { display: inline-flex; border: 1px solid #0f3460; border-radius: 8px; overflow: hidden; }
-.variant-toggle button { padding: 8px 20px; background: #16213e; color: #a0a0a0; border: none;
-  cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-.variant-toggle button.active { background: #0f3460; color: #e94560; }
-.variant-toggle button:hover:not(.active) { color: #e0e0e0; }
+.variant-toggle, .street-toggle, .speed-toggle { display: inline-flex; border: 1px solid #0f3460; border-radius: 6px; overflow: hidden; }
+.variant-toggle button, .street-toggle button, .speed-toggle button { padding: 8px 16px; background: #16213e; color: #a0a0a0; border: none; border-right: 1px solid #0f3460; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+.variant-toggle button:last-child, .street-toggle button:last-child, .speed-toggle button:last-child { border-right: none; }
+.variant-toggle button.active, .street-toggle button.active, .speed-toggle button.active { background: #0f3460; color: #e94560; }
 
-.tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
-.tab { padding: 10px 20px; background: #16213e; border: 1px solid #0f3460; border-radius: 8px 8px 0 0;
-       cursor: pointer; color: #a0a0a0; transition: all 0.2s; }
-.tab.active { background: #0f3460; color: #e94560; border-bottom-color: #0f3460; }
-.tab:hover { color: #e94560; }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+.tab { padding: 10px 20px; background: #16213e; border: 1px solid #0f3460; border-radius: 8px 8px 0 0; cursor: pointer; color: #a0a0a0; }
+.tab.active { background: #0f3460; color: #e94560; }
 .panel { display: none; }
 .panel.active { display: block; }
 
-.street-toggle { display: inline-flex; border: 1px solid #0f3460; border-radius: 6px; overflow: hidden; margin-right: 12px; }
-.street-btn { padding: 8px 16px; background: #16213e; color: #a0a0a0; border: none; border-right: 1px solid #0f3460;
-  cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
-.street-btn:last-child { border-right: none; }
-.street-btn.active { background: #0f3460; color: #e94560; }
-.street-btn:hover:not(.active) { color: #e0e0e0; }
-
 .input-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
 .input-row label { color: #a0a0a0; font-size: 0.9rem; }
-.input-row input { padding: 8px 12px; background: #16213e; border: 1px solid #0f3460;
-  color: #e0e0e0; border-radius: 6px; font-size: 0.95rem; width: 220px; }
+.input-row input { padding: 8px 12px; background: #16213e; border: 1px solid #0f3460; color: #e0e0e0; border-radius: 6px; font-size: 0.95rem; width: 220px; }
 .input-row input::placeholder { color: #555; }
-button { padding: 8px 16px; background: #e94560; color: white; border: none; border-radius: 6px;
-  cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
+button { padding: 8px 16px; background: #e94560; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
 button:hover { background: #c73a52; }
 button:disabled { background: #555; cursor: not-allowed; }
 .btn-secondary { background: #0f3460; }
-.btn-secondary:hover { background: #1a4a7a; }
 .btn-small { padding: 6px 12px; font-size: 0.8rem; }
 .status { color: #a0a0a0; font-size: 0.85rem; margin-top: 8px; min-height: 20px; }
 .error { color: #e94560; }
-.note { color: #666; font-size: 0.8rem; font-style: italic; margin-top: 4px; }
 .card-display { font-size: 0.95rem; margin-top: 4px; }
 .card-display .used { color: #e0e0e0; font-weight: 600; }
 .card-display .unused { color: #666; text-decoration: line-through; }
 
 .ranking-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.9rem; }
-.ranking-table th { text-align: left; padding: 8px 12px; background: #16213e; color: #a0a0a0;
-  border-bottom: 2px solid #0f3460; position: sticky; top: 0; z-index: 1; }
+.ranking-table th { text-align: left; padding: 8px 12px; background: #16213e; color: #a0a0a0; border-bottom: 2px solid #0f3460; position: sticky; top: 0; z-index: 1; }
 .ranking-table td { padding: 6px 12px; border-bottom: 1px solid #1a1a3e; }
 .ranking-table tr:hover { background: #16213e; }
 .ranking-table .rank-col { width: 50px; color: #888; }
@@ -64,19 +48,17 @@ button:disabled { background: #555; cursor: not-allowed; }
 .ranking-table .suited { color: #e94560; }
 .ranking-table .offsuit { color: #4ec5d4; }
 .ranking-table .pair { color: #ffc107; }
+.ranking-table .combo-row td { padding: 3px 12px 3px 32px; color: #999; font-size: 0.82rem; border-bottom: 1px solid #141428; }
+.ranking-table .combo-row .hand-col { font-weight: 400; color: #888; }
 
 .hand-grid { display: grid; gap: 2px; width: fit-content; }
 .grid-9 { grid-template-columns: repeat(9, 38px); }
 .grid-13 { grid-template-columns: repeat(13, 34px); }
-.grid-cell { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-  font-size: 0.7rem; font-weight: 600; border-radius: 4px; cursor: default; transition: all 0.15s; }
-.grid-cell.in-range { opacity: 1; }
-.grid-cell.out-range { opacity: 0.25; }
+.grid-cell { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; border-radius: 4px; cursor: default; }
 .grid-cell:hover { transform: scale(1.15); z-index: 1; }
 
 .slider-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
 .slider-row input[type="range"] { flex: 1; min-width: 150px; accent-color: #e94560; }
-.slider-label { font-size: 0.9rem; color: #a0a0a0; min-width: 60px; }
 
 .vs-range-results { margin-top: 16px; padding: 16px; background: #16213e; border-radius: 8px; }
 .vs-range-results .hero-info { font-size: 1.1rem; margin-bottom: 12px; }
@@ -85,18 +67,10 @@ button:disabled { background: #555; cursor: not-allowed; }
 .metric.bad { background: #4a1a1a; color: #ef5350; }
 .metric.neutral { background: #2a2a4a; color: #a0a0a0; }
 
-.speed-toggle { display: inline-flex; border: 1px solid #0f3460; border-radius: 6px; overflow: hidden; }
-.speed-btn { padding: 6px 14px; background: #16213e; color: #a0a0a0; border: none; border-right: 1px solid #0f3460;
-  cursor: pointer; font-size: 0.8rem; }
-.speed-btn:last-child { border-right: none; }
-.speed-btn.active { background: #0f3460; color: #e94560; }
-
 .split-view { display: flex; gap: 24px; flex-wrap: wrap; }
 .split-left { flex: 1; min-width: 300px; max-height: 600px; overflow-y: auto; }
 .split-right { flex: 0 0 auto; }
-
 .subtitle { text-align: center; color: #888; margin-bottom: 16px; font-size: 0.9rem; }
-
 .progress-bar { width: 100%; height: 4px; background: #16213e; border-radius: 2px; margin-top: 8px; overflow: hidden; }
 .progress-fill { height: 100%; background: #e94560; transition: width 0.1s; }
 </style>
@@ -119,286 +93,323 @@ button:disabled { background: #555; cursor: not-allowed; }
     <div class="tab" data-tab="vsrange">VS Range</div>
   </div>
 
-  <!-- ===== RANKING TAB ===== -->
   <div id="ranking" class="panel active">
     <div class="input-row">
-      <div class="street-toggle" id="street-toggle">
+      <div class="street-toggle">
         <button class="street-btn active" data-street="preflop" onclick="setStreet(this)">Preflop</button>
         <button class="street-btn" data-street="flop" onclick="setStreet(this)">Flop</button>
         <button class="street-btn" data-street="turn" onclick="setStreet(this)">Turn</button>
         <button class="street-btn" data-street="river" onclick="setStreet(this)">River</button>
       </div>
-      <input type="text" id="board-input" placeholder="e.g. Tc7sAc7d or Tc 7s Ac 7d">
+      <input type="text" id="board-input" placeholder="e.g. Tc7sAc7d">
       <button onclick="lookupRanking()">Look Up</button>
       <button class="btn-secondary btn-small" onclick="randomBoard()">Random</button>
     </div>
     <div id="card-display" class="card-display"></div>
     <div id="ranking-status" class="status"></div>
-
     <div class="split-view">
-      <div class="split-left">
-        <div id="ranking-result"></div>
-      </div>
-      <div class="split-right">
-        <div id="ranking-grid"></div>
-      </div>
+      <div class="split-left"><div id="ranking-result"></div></div>
+      <div class="split-right"><div id="ranking-grid"></div></div>
     </div>
   </div>
 
-  <!-- ===== VS RANGE TAB ===== -->
   <div id="vsrange" class="panel">
     <div class="input-row">
       <label>Hero:</label>
       <input type="text" id="hero-input" placeholder="e.g. AhKd" style="width:120px">
       <label>Board:</label>
-      <input type="text" id="vr-board-input" placeholder="optional, e.g. Qh Jc 3s 7d">
+      <input type="text" id="vr-board-input" placeholder="optional">
       <button id="sim-btn" onclick="runVsRange()">Simulate</button>
       <div class="speed-toggle">
-        <button class="speed-btn" data-speed="fast" onclick="setSpeed(this)">Fast (200)</button>
-        <button class="speed-btn active" data-speed="medium" onclick="setSpeed(this)">Medium (1000)</button>
-        <button class="speed-btn" data-speed="slow" onclick="setSpeed(this)">Thorough (5000)</button>
+        <button class="speed-btn" data-speed="fast" onclick="setSpeed(this)">Fast</button>
+        <button class="speed-btn active" data-speed="medium" onclick="setSpeed(this)">Medium</button>
+        <button class="speed-btn" data-speed="slow" onclick="setSpeed(this)">Thorough</button>
       </div>
     </div>
-
     <div class="slider-row">
-      <span class="slider-label">Opponent range:</span>
+      <span>Opponent range:</span>
       <span id="range-min-label">0%</span>
       <input type="range" id="range-min" min="0" max="100" value="0" step="1" oninput="syncSliders()">
       <span>to</span>
       <input type="range" id="range-max" min="0" max="100" value="100" step="1" oninput="syncSliders()">
       <span id="range-max-label">100%</span>
     </div>
-
     <div id="vr-status" class="status"></div>
     <div id="vr-progress" class="progress-bar" style="display:none"><div class="progress-fill" id="vr-progress-fill"></div></div>
-
     <div class="split-view">
-      <div class="split-left">
-        <div id="vr-result"></div>
-      </div>
-      <div class="split-right">
-        <div id="vr-grid"></div>
-      </div>
+      <div class="split-left"><div id="vr-result"></div></div>
+      <div class="split-right"><div id="vr-grid"></div></div>
     </div>
   </div>
 </div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────────────────
-
-let currentVariant = 'sd';
-let currentStreet = 'preflop';
-let simSpeed = 'medium';
-
-const SD_RANKS = 'AKQJT9876';
-const STD_RANKS = 'AKQJT98765432';
+let currentVariant = 'sd', currentStreet = 'preflop', simSpeed = 'medium';
+const SD_RANKS = 'AKQJT9876', STD_RANKS = 'AKQJT98765432', SUIT_CHARS = 'shdc';
 const RANK_CHARS = () => currentVariant === 'sd' ? SD_RANKS : STD_RANKS;
-const SUIT_CHARS = 'shdc';
-
 const DATA = {};
+const RANK_C2I = {A:12,K:11,Q:10,J:9,T:8,'9':7,'8':6,'7':5,'6':4,'5':3,'4':2,'3':1,'2':0};
+const SUIT_C2I = {s:1,h:2,d:4,c:8};
+const I2R = {12:'A',11:'K',10:'Q',9:'J',8:'T',7:'9',6:'8',5:'7',4:'6',3:'5',2:'4',1:'3',0:'2'};
+const I2S = {1:'s',2:'h',4:'d',8:'c'};
+const TREYS_SUITS = [1,2,4,8];
 
-// ── Data loading ──────────────────────────────────────────────────────────
-
-async function loadJSON(url) {
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Failed to load ${url}`);
-  return resp.json();
-}
-
-async function ensureData(key, url) {
-  if (DATA[key]) return DATA[key];
-  DATA[key] = await loadJSON(url);
-  return DATA[key];
-}
-
-// ── Card parsing ──────────────────────────────────────────────────────────
-
-const RANK_CHAR_TO_INT = {A:12,K:11,Q:10,J:9,T:8,'9':7,'8':6,'7':5,'6':4,'5':3,'4':2,'3':1,'2':0};
-const SUIT_CHAR_TO_INT = {s:1,h:2,d:4,c:8};
-const INT_TO_RANK = {12:'A',11:'K',10:'Q',9:'J',8:'T',7:'9',6:'8',5:'7',4:'6',3:'5',2:'4',1:'3',0:'2'};
-const INT_TO_SUIT = {1:'s',2:'h',4:'d',8:'c'};
-const TREYS_SUITS_SORTED = [1, 2, 4, 8];
+async function loadJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error('Failed: '+url); return r.json(); }
+async function ensureData(key, url) { if (DATA[key]) return DATA[key]; DATA[key] = await loadJSON(url); return DATA[key]; }
 
 function parseCards(text) {
-  text = text.trim().toUpperCase();
-  if (!text) return [];
+  text = text.trim().toUpperCase(); if (!text) return [];
   let tokens = [];
-  const parts = text.replace(/[,]+/g, ' ').split(/\s+/).filter(Boolean);
-  for (const part of parts) {
-    if (part.length === 2) {
-      tokens.push(part);
-    } else if (part.length % 2 === 0) {
-      for (let i = 0; i < part.length; i += 2) tokens.push(part.substring(i, i + 2));
-    } else {
-      throw new Error(`Cannot parse: ${part}`);
-    }
+  for (const part of text.replace(/[,]+/g,' ').split(/\s+/).filter(Boolean)) {
+    if (part.length === 2) tokens.push(part);
+    else if (part.length % 2 === 0) { for (let i=0;i<part.length;i+=2) tokens.push(part.substring(i,i+2)); }
+    else throw new Error('Cannot parse: '+part);
   }
   return tokens.map(t => {
-    const r = t[0], s = t[1].toLowerCase();
-    if (!(r in RANK_CHAR_TO_INT)) throw new Error(`Invalid rank: ${r}`);
-    if (!(s in SUIT_CHAR_TO_INT)) throw new Error(`Invalid suit: ${s}`);
-    return { rank: RANK_CHAR_TO_INT[r], suit: SUIT_CHAR_TO_INT[s], str: r + s };
+    const r=t[0], s=t[1].toLowerCase();
+    if (!(r in RANK_C2I)) throw new Error('Invalid rank: '+r);
+    if (!(s in SUIT_C2I)) throw new Error('Invalid suit: '+s);
+    return {rank:RANK_C2I[r], suit:SUIT_C2I[s], str:r+s};
   });
 }
 
-function cardStr(c) { return INT_TO_RANK[c.rank] + INT_TO_SUIT[c.suit]; }
+function cardStr(c) { return I2R[c.rank]+I2S[c.suit]; }
+function cardId(c) { return c.rank*16+c.suit; }
 
 function canonicalizeBoard(cards) {
-  const rs = cards.map(c => [c.rank, c.suit]).sort((a,b) => a[0]-b[0] || a[1]-b[1]);
-  const suitMap = {};
-  let nextS = 0;
-  for (const [r, s] of rs) {
-    if (!(s in suitMap)) suitMap[s] = nextS++;
-  }
-  for (const s of TREYS_SUITS_SORTED) {
-    if (!(s in suitMap)) suitMap[s] = nextS++;
-  }
-  const canon = rs.map(([r, s]) => [r, suitMap[s]]).sort((a,b) => a[0]-b[0] || a[1]-b[1]);
-  return { key: canon.map(p => p[0]+','+p[1]).join('|'), suitMap };
+  const rs = cards.map(c=>[c.rank,c.suit]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const sm={}; let ns=0;
+  for (const [r,s] of rs) { if (!(s in sm)) sm[s]=ns++; }
+  for (const s of TREYS_SUITS) { if (!(s in sm)) sm[s]=ns++; }
+  const canon = rs.map(([r,s])=>[r,sm[s]]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  return {key: canon.map(p=>p[0]+','+p[1]).join('|'), suitMap:sm};
 }
 
-function getHandLabel(c1, c2) {
-  let r1 = c1.rank, s1 = c1.suit, r2 = c2.rank, s2 = c2.suit;
-  if (r1 < r2) { [r1, s1, r2, s2] = [r2, s2, r1, s1]; }
-  const ch1 = INT_TO_RANK[r1], ch2 = INT_TO_RANK[r2];
-  if (r1 === r2) return ch1 + ch2;
-  return s1 === s2 ? ch1 + ch2 + 's' : ch1 + ch2 + 'o';
+function chunkKey(cards) {
+  const ranks = [...new Set(cards.map(c=>c.rank))].sort((a,b)=>a-b);
+  const lo1 = I2R[ranks[0]].toLowerCase();
+  const lo2 = ranks.length > 1 ? I2R[ranks[1]].toLowerCase() : lo1;
+  return lo1 + lo2;
+}
+
+function getHandLabel(c1,c2) {
+  let r1=c1.rank,s1=c1.suit,r2=c2.rank,s2=c2.suit;
+  if (r1<r2) [r1,s1,r2,s2]=[r2,s2,r1,s1];
+  const a=I2R[r1],b=I2R[r2];
+  if (r1===r2) return a+b;
+  return s1===s2 ? a+b+'s' : a+b+'o';
 }
 
 function handCssClass(label) {
-  if (label.length === 2) return 'pair';
-  return label.endsWith('s') ? 'suited' : 'offsuit';
+  const base = label.split(':')[0];
+  if (base.length===2) return 'pair';
+  return base.endsWith('s') ? 'suited' : 'offsuit';
 }
 
-// ── Build deck ────────────────────────────────────────────────────────────
+function baseLabel(comboLabel) {
+  // "AKs:0" -> "AKs", "AKo:01" -> "AKo", "AKx:1" -> "AKo" (offsuit within group)
+  const parts = comboLabel.split(':');
+  const base = parts[0];
+  if (base.endsWith('x')) return base.slice(0,-1) + 'o';
+  return base;
+}
 
 function buildDeck() {
-  const ranks = RANK_CHARS();
-  const deck = [];
-  for (const r of ranks) {
-    for (const s of SUIT_CHARS) {
-      deck.push({ rank: RANK_CHAR_TO_INT[r], suit: SUIT_CHAR_TO_INT[s], str: r + s });
-    }
-  }
+  const ranks = RANK_CHARS(), deck = [];
+  for (const r of ranks) for (const s of SUIT_CHARS) deck.push({rank:RANK_C2I[r],suit:SUIT_C2I[s],str:r+s});
   return deck;
 }
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+function shuffle(a) { for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+// ── Suit group description for display ─────────────────────────────
+
+function boardSuitGroups(cards) {
+  // Returns group_id -> description string
+  const freq = {};
+  for (const c of cards) freq[c.suit] = (freq[c.suit]||0)+1;
+  // Canonical suit map
+  const sm = {};
+  const rs = cards.map(c=>[c.rank,c.suit]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  let ns=0;
+  for (const [r,s] of rs) { if (!(s in sm)) sm[s]=ns++; }
+  for (const s of TREYS_SUITS) { if (!(s in sm)) sm[s]=ns++; }
+
+  // Group canonical suits by frequency
+  const canonFreq = {};
+  for (const [origS, canonS] of Object.entries(sm)) {
+    canonFreq[canonS] = freq[parseInt(origS)] || 0;
   }
-  return arr;
+  // Group by freq desc
+  const freqGroups = {};
+  for (const [cs, f] of Object.entries(canonFreq)) {
+    const key = f;
+    if (!freqGroups[key]) freqGroups[key] = [];
+    freqGroups[key].push(parseInt(cs));
+  }
+  const sortedFreqs = Object.keys(freqGroups).map(Number).sort((a,b)=>b-a);
+  const groupDesc = {};
+  let gid = 0;
+  for (const f of sortedFreqs) {
+    const suits = freqGroups[f].sort();
+    // Map canonical suit IDs back to original suits for display
+    const invMap = {};
+    for (const [orig, canon] of Object.entries(sm)) invMap[canon] = parseInt(orig);
+    const suitNames = suits.map(cs => {
+      const origS = invMap[cs];
+      return I2S[origS] ? I2S[origS] : '?';
+    });
+    if (f > 0) {
+      groupDesc[gid] = suitNames.join(',') + ' (' + f + 'x)';
+    } else {
+      groupDesc[gid] = suitNames.join(',') + ' (off-board)';
+    }
+    for (const s of suits) gid++;  // each suit increments gid in our scheme
+    // Wait - in convert_to_json, group_map assigns same gid to all suits with same freq
+    // So all suits with freq 0 get the SAME gid
+    break; // Actually let me re-think...
+  }
+  // Simpler: just describe each group by its frequency
+  // gid 0 = highest freq suits, gid 1 = next, etc.
+  const result = {};
+  let g = 0;
+  for (const f of sortedFreqs) {
+    const suits = freqGroups[f].sort();
+    const invMap = {};
+    for (const [orig, canon] of Object.entries(sm)) invMap[canon] = parseInt(orig);
+    const suitNames = suits.map(cs => I2S[invMap[cs]] || '?');
+    if (suits.length === 1) {
+      result[g] = suitNames[0] + (f > 0 ? ' ('+f+'x on board)' : '');
+    } else {
+      result[g] = suitNames.join('/') + (f > 0 ? ' ('+f+'x each)' : ' (off-board)');
+    }
+    g++;
+  }
+  return result;
 }
 
-function cardId(c) { return c.rank * 16 + c.suit; }
+function comboDescription(comboLabel, groupDescs) {
+  // Parse "AKs:0" -> "suited in [group 0 desc]"
+  const [base, groupPart] = comboLabel.split(':');
+  if (!groupPart || !groupDescs) return '';
+  if (base.endsWith('s')) {
+    return 'suited ' + (groupDescs[groupPart] || 'group '+groupPart);
+  } else if (base.endsWith('x')) {
+    return 'diff suits ' + (groupDescs[groupPart] || 'group '+groupPart);
+  } else {
+    // offsuit or pair across groups
+    const g1 = groupPart[0], g2 = groupPart[1];
+    if (g1 === g2) return 'both ' + (groupDescs[g1] || 'group '+g1);
+    return (groupDescs[g1]||g1) + ' + ' + (groupDescs[g2]||g2);
+  }
+}
 
-// ── UI switching ──────────────────────────────────────────────────────────
+// ── UI ─────────────────────────────────────────────────────────────
 
 function setVariant(v) {
   currentVariant = v;
-  document.querySelectorAll('.variant-toggle button').forEach(b =>
-    b.classList.toggle('active', b.dataset.variant === v));
+  document.querySelectorAll('.variant-toggle button').forEach(b=>b.classList.toggle('active',b.dataset.variant===v));
   lookupRanking();
 }
-
 function setStreet(btn) {
   currentStreet = btn.dataset.street;
-  document.querySelectorAll('.street-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.street-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   updateCardDisplay();
   lookupRanking();
 }
-
 function setSpeed(btn) {
   simSpeed = btn.dataset.speed;
-  document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
-
 function syncSliders() {
-  const min = document.getElementById('range-min');
-  const max = document.getElementById('range-max');
-  if (parseInt(min.value) > parseInt(max.value)) {
-    if (document.activeElement === min) max.value = min.value;
-    else min.value = max.value;
-  }
-  document.getElementById('range-min-label').textContent = min.value + '%';
-  document.getElementById('range-max-label').textContent = max.value + '%';
+  const mn=document.getElementById('range-min'), mx=document.getElementById('range-max');
+  if (parseInt(mn.value)>parseInt(mx.value)) { if (document.activeElement===mn) mx.value=mn.value; else mn.value=mx.value; }
+  document.getElementById('range-min-label').textContent=mn.value+'%';
+  document.getElementById('range-max-label').textContent=mx.value+'%';
 }
 
-// Tab switching
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById(tab.dataset.tab).classList.add('active');
-  });
-});
-
-// Enter key on inputs
-document.getElementById('board-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') lookupRanking();
-});
-document.getElementById('hero-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') runVsRange();
-});
-document.getElementById('vr-board-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') runVsRange();
-});
-
-// Auto-detect street from board input
-document.getElementById('board-input').addEventListener('input', () => {
-  const text = document.getElementById('board-input').value.trim();
-  if (text) {
-    try {
-      const n = parseCards(text).length;
-      let street = n >= 5 ? 'river' : n === 4 ? 'turn' : n === 3 ? 'flop' : 'preflop';
-      currentStreet = street;
-      document.querySelectorAll('.street-btn').forEach(b =>
-        b.classList.toggle('active', b.dataset.street === street));
-    } catch(e) {}
-  }
+document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  tab.classList.add('active'); document.getElementById(tab.dataset.tab).classList.add('active');
+}));
+document.getElementById('board-input').addEventListener('keydown',e=>{if(e.key==='Enter')lookupRanking();});
+document.getElementById('hero-input').addEventListener('keydown',e=>{if(e.key==='Enter')runVsRange();});
+document.getElementById('vr-board-input').addEventListener('keydown',e=>{if(e.key==='Enter')runVsRange();});
+document.getElementById('board-input').addEventListener('input',()=>{
+  try{const n=parseCards(document.getElementById('board-input').value).length;
+  const s=n>=5?'river':n===4?'turn':n===3?'flop':'preflop'; currentStreet=s;
+  document.querySelectorAll('.street-btn').forEach(b=>b.classList.toggle('active',b.dataset.street===s));}catch(e){}
   updateCardDisplay();
 });
-
-// ── Card display ──────────────────────────────────────────────────────────
 
 function updateCardDisplay() {
-  const boardText = document.getElementById('board-input').value.trim();
-  const displayEl = document.getElementById('card-display');
-  if (!boardText || currentStreet === 'preflop') { displayEl.innerHTML = ''; return; }
-  try {
-    const cards = parseCards(boardText);
-    const needed = {flop: 3, turn: 4, river: 5}[currentStreet] || 0;
-    let html = 'Board: ';
-    cards.forEach((c, i) => {
-      html += `<span class="${i < needed ? 'used' : 'unused'}">${cardStr(c)}</span> `;
-    });
-    if (cards.length < needed) html += `<span class="error">(need ${needed - cards.length} more)</span>`;
-    displayEl.innerHTML = html;
-  } catch(e) {
-    displayEl.innerHTML = `<span class="error">${e.message}</span>`;
-  }
+  const t=document.getElementById('board-input').value.trim(), el=document.getElementById('card-display');
+  if (!t||currentStreet==='preflop') {el.innerHTML='';return;}
+  try{const cards=parseCards(t), need={flop:3,turn:4,river:5}[currentStreet]||0;
+  let h='Board: '; cards.forEach((c,i)=>{h+=`<span class="${i<need?'used':'unused'}">${cardStr(c)}</span> `;});
+  if(cards.length<need) h+=`<span class="error">(need ${need-cards.length} more)</span>`;
+  el.innerHTML=h;}catch(e){el.innerHTML=`<span class="error">${e.message}</span>`;}
 }
-
-// ── Random board ──────────────────────────────────────────────────────────
 
 function randomBoard() {
-  if (currentStreet === 'preflop') {
-    currentStreet = 'flop';
-    document.querySelectorAll('.street-btn').forEach(b =>
-      b.classList.toggle('active', b.dataset.street === 'flop'));
-  }
-  const n = {flop: 3, turn: 4, river: 5}[currentStreet];
-  const deck = shuffle(buildDeck());
-  document.getElementById('board-input').value = deck.slice(0, n).map(c => cardStr(c)).join(' ');
-  updateCardDisplay();
-  lookupRanking();
+  if(currentStreet==='preflop'){currentStreet='flop';document.querySelectorAll('.street-btn').forEach(b=>b.classList.toggle('active',b.dataset.street==='flop'));}
+  const n={flop:3,turn:4,river:5}[currentStreet], deck=shuffle(buildDeck());
+  document.getElementById('board-input').value=deck.slice(0,n).map(c=>cardStr(c)).join(' ');
+  updateCardDisplay(); lookupRanking();
 }
 
-// ── Ranking lookup ────────────────────────────────────────────────────────
+// ── Load chunked board data ────────────────────────────────────────
+
+async function loadBoardRanking(cards, street) {
+  const isSD = currentVariant === 'sd';
+  if (!isSD) throw new Error('Standard deck board data not yet available');
+
+  const prefix = street === 'turn' ? 'sd_turns' : 'sd_rivers';
+  const ck = chunkKey(cards);
+  const dataKey = prefix + '_' + ck;
+  const url = 'data/' + dataKey + '.json';
+
+  const data = await ensureData(dataKey, url);
+  const {key} = canonicalizeBoard(cards);
+  const boardData = data[key];
+  if (!boardData) throw new Error('Board not found in data');
+  return boardData;
+}
+
+// ── Group combo entries by base hand label ─────────────────────────
+
+function groupByBaseLabel(rawRanking) {
+  // rawRanking: [[comboLabel, value, combos], ...]
+  // Returns [{label, avgValue, totalCombos, rank, combos: [{label, value, combos, desc}]}]
+  const groups = {};
+  const order = [];
+  for (const [cl, val, cnt] of rawRanking) {
+    const bl = baseLabel(cl);
+    if (!groups[bl]) { groups[bl] = {label:bl, entries:[], totalVal:0, totalCombos:0}; order.push(bl); }
+    groups[bl].entries.push({label:cl, value:val, combos:cnt});
+    groups[bl].totalVal += val * cnt;
+    groups[bl].totalCombos += cnt;
+  }
+  // Compute weighted average and sort
+  const result = order.map(bl => {
+    const g = groups[bl];
+    return {
+      label: g.label,
+      avgValue: g.totalCombos > 0 ? g.totalVal / g.totalCombos : 0,
+      totalCombos: g.totalCombos,
+      combos: g.entries
+    };
+  });
+  // Sort by avgValue (river: ascending percentile, turn: descending AE)
+  // The raw data is already sorted, so weighted averages should roughly preserve order
+  // But let's re-sort to be sure
+  return result;
+}
+
+// ── Ranking lookup ─────────────────────────────────────────────────
 
 async function lookupRanking() {
   const boardText = document.getElementById('board-input').value.trim();
@@ -407,377 +418,236 @@ async function lookupRanking() {
   const resultEl = document.getElementById('ranking-result');
   const gridEl = document.getElementById('ranking-grid');
   const displayEl = document.getElementById('card-display');
-
-  resultEl.innerHTML = '';
-  gridEl.innerHTML = '';
-
-  const ranks = RANK_CHARS();
-  const isSD = currentVariant === 'sd';
-  const minRank = isSD ? 4 : 0;
+  resultEl.innerHTML=''; gridEl.innerHTML='';
+  const ranks = RANK_CHARS(), isSD = currentVariant==='sd', minRank = isSD?4:0;
 
   try {
-    let ranking;
-    let isRiver = false;
+    let ranking, isRiver=false, boardCards=null;
 
     if (street === 'preflop') {
-      displayEl.innerHTML = '';
-      const key = isSD ? 'sdPreflop' : 'stdPreflop';
-      const url = isSD ? 'data/sd_preflop.json' : 'data/std_preflop.json';
-      statusEl.textContent = 'Loading preflop data...';
+      displayEl.innerHTML='';
+      const key=isSD?'sdPreflop':'stdPreflop', url=isSD?'data/sd_preflop.json':'data/std_preflop.json';
       const data = await ensureData(key, url);
-      ranking = data.map((row, i) => ({
-        hand: row[0], value: row[1], rank: i + 1, combos: null
-      }));
-      statusEl.textContent = `${isSD ? 'Short Deck' : 'Standard'} preflop ranking (Action Equity)`;
-
+      ranking = data.map((row,i)=>({label:row[0], avgValue:row[1], rank:i+1, totalCombos:null, combos:null}));
+      statusEl.textContent = `${isSD?'Short Deck':'Standard'} preflop ranking (Action Equity)`;
     } else {
-      if (!boardText) { statusEl.innerHTML = '<span class="error">Enter board cards or click Random</span>'; return; }
+      if (!boardText) {statusEl.innerHTML='<span class="error">Enter board cards or click Random</span>';return;}
       const allCards = parseCards(boardText);
-      if (allCards.some(c => c.rank < minRank)) {
-        statusEl.innerHTML = `<span class="error">${isSD ? 'Short deck: cards 6-A only' : 'Invalid card'}</span>`;
-        return;
-      }
-      const needed = {flop: 3, turn: 4, river: 5}[street];
-      if (allCards.length < needed) {
-        statusEl.innerHTML = `<span class="error">${street} needs at least ${needed} cards (got ${allCards.length})</span>`;
-        return;
-      }
-      const cards = allCards.slice(0, needed);
+      if (allCards.some(c=>c.rank<minRank)) {statusEl.innerHTML='<span class="error">Invalid card</span>';return;}
+      const need={flop:3,turn:4,river:5}[street];
+      if (allCards.length<need) {statusEl.innerHTML=`<span class="error">Need ${need} cards for ${street}</span>`;return;}
+      const cards = allCards.slice(0, need);
+      boardCards = cards;
 
-      // Show card display
-      let dhtml = 'Board: ';
-      allCards.forEach((c, i) => {
-        dhtml += `<span class="${i < needed ? 'used' : 'unused'}">${cardStr(c)}</span> `;
-      });
-      displayEl.innerHTML = dhtml;
+      let dhtml='Board: ';
+      allCards.forEach((c,i)=>{dhtml+=`<span class="${i<need?'used':'unused'}">${cardStr(c)}</span> `;});
+      displayEl.innerHTML=dhtml;
 
-      if (street === 'flop') {
-        if (!isSD) { statusEl.innerHTML = '<span class="error">Standard deck flop data not yet available</span>'; return; }
-        statusEl.innerHTML = '<span class="error">Short deck flop lookup coming soon (data being re-computed)</span>';
-        return;
-      }
-      if (!isSD) {
-        statusEl.innerHTML = `<span class="error">Standard deck ${street} data not yet available. Run the simulation first.</span>`;
-        return;
-      }
+      if (street==='flop') {statusEl.innerHTML='<span class="error">Flop data coming soon</span>';return;}
 
-      isRiver = (street === 'river');
-      const dataKey = street === 'turn' ? 'sdTurns' : 'sdRivers';
-      const dataUrl = street === 'turn' ? 'data/sd_turns.json' : 'data/sd_rivers.json';
-      const sizeHint = street === 'turn' ? '1.3 MB' : '3.5 MB';
-      statusEl.textContent = `Loading ${street} data (${sizeHint})...`;
-      const data = await ensureData(dataKey, dataUrl);
+      isRiver = street==='river';
+      const sizeHint = street==='turn'?'~0.5 MB':'~3 MB';
+      statusEl.textContent=`Loading ${street} data (${sizeHint})...`;
+      const rawRanking = await loadBoardRanking(cards, street);
 
-      const { key } = canonicalizeBoard(cards);
-      const boardData = data[key];
-      if (!boardData) { statusEl.innerHTML = '<span class="error">Board not found. Check your cards.</span>'; return; }
+      // Group by base label
+      let grouped = groupByBaseLabel(rawRanking);
+      if (isRiver) grouped.sort((a,b)=>a.avgValue-b.avgValue);
+      else grouped.sort((a,b)=>b.avgValue-a.avgValue);
+      grouped.forEach((g,i)=>g.rank=i+1);
+      ranking = grouped;
 
-      ranking = boardData.map((row, i) => ({
-        hand: row[0], value: row[1], rank: i + 1, combos: row[2]
-      }));
-      const boardStr = cards.map(c => cardStr(c)).join(' ');
-      statusEl.textContent = `${street.charAt(0).toUpperCase() + street.slice(1)} ranking for ${boardStr}`;
+      const bs = cards.map(c=>cardStr(c)).join(' ');
+      statusEl.textContent=`${street.charAt(0).toUpperCase()+street.slice(1)} ranking for ${bs}`;
     }
 
-    renderRanking(ranking, resultEl, isRiver);
-    renderGrid(ranking, gridEl, ranks, 100, 0, isRiver);
-
-  } catch (e) {
-    statusEl.innerHTML = `<span class="error">${e.message}</span>`;
-  }
+    const groupDescs = boardCards ? boardSuitGroups(boardCards) : null;
+    renderRanking(ranking, resultEl, isRiver, groupDescs);
+    renderGrid(ranking, gridEl, ranks, 100, 0, !isRiver);
+  } catch(e) { statusEl.innerHTML=`<span class="error">${e.message}</span>`; }
 }
 
-// ── VS Range — Monte Carlo simulation using pre-computed river data ──────
+// ── VS Range simulation ───────────────────────────────────────────
 
 async function runVsRange() {
-  const heroText = document.getElementById('hero-input').value.trim();
-  const boardText = document.getElementById('vr-board-input').value.trim();
-  const statusEl = document.getElementById('vr-status');
-  const resultEl = document.getElementById('vr-result');
-  const gridEl = document.getElementById('vr-grid');
-  const progressBar = document.getElementById('vr-progress');
-  const progressFill = document.getElementById('vr-progress-fill');
+  const heroText=document.getElementById('hero-input').value.trim();
+  const boardText=document.getElementById('vr-board-input').value.trim();
+  const statusEl=document.getElementById('vr-status');
+  const resultEl=document.getElementById('vr-result');
+  const gridEl=document.getElementById('vr-grid');
+  const progressBar=document.getElementById('vr-progress');
+  const progressFill=document.getElementById('vr-progress-fill');
+  resultEl.innerHTML=''; gridEl.innerHTML=''; progressBar.style.display='none';
+  const isSD=currentVariant==='sd', ranks=RANK_CHARS(), minRank=isSD?4:0;
 
-  resultEl.innerHTML = '';
-  gridEl.innerHTML = '';
-  progressBar.style.display = 'none';
-
-  const isSD = currentVariant === 'sd';
-  const ranks = RANK_CHARS();
-  const minRank = isSD ? 4 : 0;
-
-  if (!isSD) { statusEl.innerHTML = '<span class="error">Standard deck simulation not yet available (need river data)</span>'; return; }
-  if (!heroText) { statusEl.innerHTML = '<span class="error">Enter hero hand (2 cards)</span>'; return; }
+  if (!isSD) {statusEl.innerHTML='<span class="error">Standard deck not yet available</span>';return;}
+  if (!heroText) {statusEl.innerHTML='<span class="error">Enter hero hand</span>';return;}
 
   try {
-    const heroCards = parseCards(heroText);
-    if (heroCards.length !== 2) { statusEl.innerHTML = '<span class="error">Hero needs exactly 2 cards</span>'; return; }
-    if (heroCards.some(c => c.rank < minRank)) { statusEl.innerHTML = '<span class="error">Invalid card for short deck</span>'; return; }
+    const heroCards=parseCards(heroText);
+    if (heroCards.length!==2) {statusEl.innerHTML='<span class="error">Hero needs 2 cards</span>';return;}
+    if (heroCards.some(c=>c.rank<minRank)) {statusEl.innerHTML='<span class="error">Invalid card</span>';return;}
+    const heroLabel=getHandLabel(heroCards[0],heroCards[1]);
+    const heroCardIds=new Set(heroCards.map(cardId));
 
-    const heroLabel = getHandLabel(heroCards[0], heroCards[1]);
-    const heroCardIds = new Set(heroCards.map(cardId));
-
-    // Parse optional board
-    let fixedBoard = [];
+    let fixedBoard=[];
     if (boardText) {
-      fixedBoard = parseCards(boardText);
-      if (fixedBoard.some(c => c.rank < minRank)) { statusEl.innerHTML = '<span class="error">Invalid board card</span>'; return; }
-      if (fixedBoard.length > 5) fixedBoard = fixedBoard.slice(0, 5);
-      // Check no overlap with hero
-      for (const bc of fixedBoard) {
-        if (heroCardIds.has(cardId(bc))) {
-          statusEl.innerHTML = '<span class="error">Board card overlaps with hero hand</span>';
-          return;
-        }
-      }
-    }
-    const cardsToComplete = 5 - fixedBoard.length;
-
-    // Get opponent range from preflop ranking
-    const preflopData = await ensureData('sdPreflop', 'data/sd_preflop.json');
-    const rangeMin = parseInt(document.getElementById('range-min').value);
-    const rangeMax = parseInt(document.getElementById('range-max').value);
-    const totalHands = preflopData.length;
-    const minIdx = Math.floor(rangeMin / 100 * totalHands);
-    const maxIdx = Math.ceil(rangeMax / 100 * totalHands);
-    const oppLabels = new Set(preflopData.slice(minIdx, maxIdx).map(r => r[0]).filter(l => l !== heroLabel));
-
-    if (oppLabels.size === 0) {
-      statusEl.innerHTML = '<span class="error">No opponents in range (excluding hero)</span>';
-      return;
+      fixedBoard=parseCards(boardText);
+      if (fixedBoard.length>5) fixedBoard=fixedBoard.slice(0,5);
+      for (const bc of fixedBoard) if (heroCardIds.has(cardId(bc))) {statusEl.innerHTML='<span class="error">Board overlaps hero</span>';return;}
     }
 
-    // Load river data for lookups
-    statusEl.textContent = 'Loading river data (3.5 MB)...';
-    const riverData = await ensureData('sdRivers', 'data/sd_rivers.json');
+    const preflopData=await ensureData('sdPreflop','data/sd_preflop.json');
+    const rangeMin=parseInt(document.getElementById('range-min').value);
+    const rangeMax=parseInt(document.getElementById('range-max').value);
+    const totalH=preflopData.length;
+    const minIdx=Math.floor(rangeMin/100*totalH), maxIdx=Math.ceil(rangeMax/100*totalH);
+    const oppLabels=new Set(preflopData.slice(minIdx,maxIdx).map(r=>r[0]).filter(l=>l!==heroLabel));
+    if (!oppLabels.size) {statusEl.innerHTML='<span class="error">No opponents in range</span>';return;}
 
-    // Run Monte Carlo
-    const numBoards = {fast: 200, medium: 1000, slow: 5000}[simSpeed];
-    statusEl.textContent = `Simulating ${numBoards} boards...`;
-    progressBar.style.display = 'block';
-    progressFill.style.width = '0%';
-    document.getElementById('sim-btn').disabled = true;
+    const numBoards={fast:200,medium:1000,slow:5000}[simSpeed];
+    statusEl.textContent=`Simulating ${numBoards} boards...`;
+    progressBar.style.display='block'; progressFill.style.width='0%';
+    document.getElementById('sim-btn').disabled=true;
+    await new Promise(r=>setTimeout(r,20));
 
-    await new Promise(r => setTimeout(r, 20)); // let UI update
+    const excludeIds=new Set([...heroCardIds,...fixedBoard.map(cardId)]);
+    const remainingDeck=buildDeck().filter(c=>!excludeIds.has(cardId(c)));
+    const cardsToComplete=5-fixedBoard.length;
 
-    // Build remaining deck (exclude hero and fixed board)
-    const excludeIds = new Set([...heroCardIds, ...fixedBoard.map(cardId)]);
-    const remainingDeck = buildDeck().filter(c => !excludeIds.has(cardId(c)));
+    let totalWEV=0, totalW=0, wins=0, losses=0, ties=0, boardsUsed=0;
+    const BATCH=50;
 
-    let totalWeightedEV = 0;
-    let totalWeight = 0;
-    let wins = 0, losses = 0, ties = 0;
-    let boardsUsed = 0;
+    for (let batch=0; batch<numBoards; batch+=BATCH) {
+      for (let b=batch; b<Math.min(batch+BATCH,numBoards); b++) {
+        const deck=shuffle([...remainingDeck]);
+        const board=[...fixedBoard,...deck.slice(0,cardsToComplete)];
+        const ck=chunkKey(board);
+        const dataKey='sd_rivers_'+ck;
+        let chunkData;
+        try { chunkData=await ensureData(dataKey,'data/'+dataKey+'.json'); } catch(e) { continue; }
+        const {key}=canonicalizeBoard(board);
+        const boardRanking=chunkData[key];
+        if (!boardRanking) continue;
 
-    const BATCH = 50;
-    for (let batch = 0; batch < numBoards; batch += BATCH) {
-      const batchEnd = Math.min(batch + BATCH, numBoards);
+        // Group by base label to get percentiles
+        const grouped=groupByBaseLabel(boardRanking);
+        grouped.sort((a,b)=>a.avgValue-b.avgValue);
+        const labelPct={};
+        for (let i=0;i<grouped.length;i++) labelPct[grouped[i].label]=(i+1)/grouped.length;
 
-      for (let b = batch; b < batchEnd; b++) {
-        // Deal remaining community cards
-        const deck = shuffle([...remainingDeck]);
-        const dealtBoard = [...fixedBoard, ...deck.slice(0, cardsToComplete)];
+        const heroPct=labelPct[heroLabel];
+        if (!heroPct) continue;
+        const heroVal=1/heroPct;
 
-        // Canonicalize and look up river ranking
-        const { key } = canonicalizeBoard(dealtBoard);
-        const boardRanking = riverData[key];
-        if (!boardRanking) continue; // shouldn't happen for valid short deck
-
-        // Build label -> percentile lookup for this board
-        const labelPct = {};
-        const total = boardRanking.length;
-        for (let i = 0; i < total; i++) {
-          const [label, val, combos] = boardRanking[i];
-          labelPct[label] = (i + 1) / total;  // river: sorted by percentile ascending, so rank = i+1
-        }
-
-        const heroPct = labelPct[heroLabel];
-        if (heroPct === undefined) continue;
-        const heroVal = 1.0 / heroPct;
-
-        // Compare hero vs each opponent label in range
-        for (const oppLabel of oppLabels) {
-          const oppPct = labelPct[oppLabel];
-          if (oppPct === undefined) continue;
-          const oppVal = 1.0 / oppPct;
-          const stake = Math.min(heroVal, oppVal);
-
-          totalWeight += stake;
-
-          if (heroPct < oppPct) {
-            totalWeightedEV += stake;
-            wins++;
-          } else if (heroPct > oppPct) {
-            totalWeightedEV -= stake;
-            losses++;
-          } else {
-            ties++;
-          }
+        for (const opp of oppLabels) {
+          const oppPct=labelPct[opp];
+          if (!oppPct) continue;
+          const stake=Math.min(heroVal,1/oppPct);
+          totalW+=stake;
+          if (heroPct<oppPct) {totalWEV+=stake;wins++;}
+          else if (heroPct>oppPct) {totalWEV-=stake;losses++;}
+          else ties++;
         }
         boardsUsed++;
       }
-
-      // Update progress
-      const pct = Math.min(100, (batchEnd / numBoards) * 100);
-      progressFill.style.width = pct + '%';
-      await new Promise(r => setTimeout(r, 0)); // yield to UI
+      progressFill.style.width=Math.min(100,((batch+BATCH)/numBoards)*100)+'%';
+      await new Promise(r=>setTimeout(r,0));
     }
 
-    document.getElementById('sim-btn').disabled = false;
-    progressBar.style.display = 'none';
+    document.getElementById('sim-btn').disabled=false;
+    progressBar.style.display='none';
 
-    const ae = totalWeight > 0 ? totalWeightedEV / totalWeight : 0;
-    const totalMatchups = wins + losses + ties;
-    const winRate = totalMatchups > 0 ? ((wins + ties * 0.5) / totalMatchups * 100) : 0;
+    const ae=totalW>0?totalWEV/totalW:0;
+    const tot=wins+losses+ties;
+    const wr=tot>0?((wins+ties*0.5)/tot*100):0;
 
-    // Show results
-    let html = '<div class="vs-range-results">';
-    html += `<div class="hero-info">Hero: <strong class="${handCssClass(heroLabel)}">${heroLabel}</strong>`;
-    if (fixedBoard.length > 0) {
-      html += ` on ${fixedBoard.map(c => cardStr(c)).join(' ')}`;
-    }
-    html += '</div>';
+    let html='<div class="vs-range-results">';
+    html+=`<div class="hero-info">Hero: <strong class="${handCssClass(heroLabel)}">${heroLabel}</strong>`;
+    if (fixedBoard.length) html+=` on ${fixedBoard.map(c=>cardStr(c)).join(' ')}`;
+    html+=`</div>`;
+    html+=`<div style="margin:8px 0">Range: ${rangeMin}%-${rangeMax}% (${oppLabels.size} types) | ${boardsUsed} boards</div>`;
+    const cls=ae>0?'good':ae<0?'bad':'neutral';
+    html+=`<div style="margin-top:12px"><span class="metric ${cls}" style="font-size:1.1rem">AE vs range: ${ae>0?'+':''}${ae.toFixed(4)}</span></div>`;
+    html+=`<div style="margin-top:8px"><span class="metric good">W:${wins.toLocaleString()}</span> <span class="metric bad">L:${losses.toLocaleString()}</span>`;
+    if(ties) html+=` <span class="metric neutral">T:${ties.toLocaleString()}</span>`;
+    html+=` <span class="metric ${wr>=50?'good':'bad'}">WR:${wr.toFixed(1)}%</span></div></div>`;
+    resultEl.innerHTML=html;
 
-    html += `<div style="margin:8px 0">Opponent range: top ${rangeMin}%-${rangeMax}% (${oppLabels.size} hand types) &bull; ${boardsUsed} boards simulated</div>`;
-
-    const aeCls = ae > 0 ? 'good' : ae < 0 ? 'bad' : 'neutral';
-    html += `<div style="margin-top:12px">`;
-    html += `<span class="metric ${aeCls}" style="font-size:1.1rem">Action Equity vs range: ${ae > 0 ? '+' : ''}${ae.toFixed(4)}</span>`;
-    html += `</div>`;
-
-    html += '<div style="margin-top:8px">';
-    html += `<span class="metric good">Wins: ${wins.toLocaleString()}</span> `;
-    html += `<span class="metric bad">Losses: ${losses.toLocaleString()}</span> `;
-    if (ties > 0) html += `<span class="metric neutral">Ties: ${ties.toLocaleString()}</span> `;
-    html += `<span class="metric ${winRate >= 50 ? 'good' : 'bad'}">Win rate: ${winRate.toFixed(1)}%</span>`;
-    html += '</div>';
-
-    html += '</div>';
-    resultEl.innerHTML = html;
-
-    // Render grid showing which hands are in the opponent range
-    const preflopRanking = preflopData.map((row, i) => ({
-      hand: row[0], value: row[1], rank: i + 1, combos: null
-    }));
-    renderGrid(preflopRanking, gridEl, ranks, rangeMax, rangeMin, false);
-
-    statusEl.textContent = `Simulation complete: ${heroLabel} vs ${rangeMin}%-${rangeMax}% range (${boardsUsed} boards)`;
-
-  } catch (e) {
-    document.getElementById('sim-btn').disabled = false;
-    progressBar.style.display = 'none';
-    statusEl.innerHTML = `<span class="error">${e.message}</span>`;
+    const pfRanking=preflopData.map((r,i)=>({label:r[0],avgValue:r[1],rank:i+1,totalCombos:null,combos:null}));
+    renderGrid(pfRanking,gridEl,ranks,rangeMax,rangeMin,true);
+    statusEl.textContent=`${heroLabel} vs ${rangeMin}%-${rangeMax}% (${boardsUsed} boards)`;
+  } catch(e) {
+    document.getElementById('sim-btn').disabled=false;
+    progressBar.style.display='none';
+    statusEl.innerHTML=`<span class="error">${e.message}</span>`;
   }
 }
 
-// ── Rendering ─────────────────────────────────────────────────────────────
+// ── Rendering ──────────────────────────────────────────────────────
 
-function renderRanking(ranking, container, isRiver = false) {
-  const valueLabel = isRiver ? 'Percentile' : 'Action Equity';
-  let html = '<table class="ranking-table"><thead><tr>';
-  html += `<th class="rank-col">#</th><th class="hand-col">Hand</th><th>${valueLabel}</th>`;
-  if (ranking[0] && ranking[0].combos !== null) html += '<th>Combos</th>';
-  html += '</tr></thead><tbody>';
+function renderRanking(ranking, container, isRiver, groupDescs) {
+  const valLabel = isRiver ? 'Percentile' : 'Action Equity';
+  const hasBoard = ranking[0] && ranking[0].combos;
+  let html='<table class="ranking-table"><thead><tr>';
+  html+=`<th class="rank-col">#</th><th class="hand-col">Hand</th><th>${valLabel}</th>`;
+  if (hasBoard) html+='<th>Combos</th>';
+  html+='</tr></thead><tbody>';
 
   for (const r of ranking) {
-    const cls = handCssClass(r.hand);
-    let valStr;
-    if (isRiver) {
-      valStr = (r.value * 100).toFixed(1) + '%';
-    } else {
-      valStr = (r.value > 0 ? '+' : '') + r.value.toFixed(4);
-    }
-    html += `<tr><td class="rank-col">${r.rank}</td>`;
-    html += `<td class="hand-col ${cls}">${r.hand}</td>`;
-    html += `<td>${valStr}</td>`;
-    if (r.combos !== null) html += `<td>${r.combos}</td>`;
-    html += '</tr>';
-  }
-  html += '</tbody></table>';
+    const cls = handCssClass(r.label);
+    const val = isRiver ? (r.avgValue*100).toFixed(1)+'%' : (r.avgValue>0?'+':'')+r.avgValue.toFixed(4);
+    html+=`<tr><td class="rank-col">${r.rank}</td><td class="hand-col ${cls}">${r.label}</td><td>${val}</td>`;
+    if (hasBoard) html+=`<td>${r.totalCombos}</td>`;
+    html+='</tr>';
 
-  if (ranking[0] && ranking[0].combos !== null) {
-    html += '<p class="note">Values averaged across suit combinations for each hand type.</p>';
-  }
-
-  container.innerHTML = html;
-}
-
-function renderGrid(ranking, container, ranks, rangePctMax, rangePctMin = 0, useEVColor = true) {
-  const n = ranks.length;
-  const gridClass = n <= 9 ? 'grid-9' : 'grid-13';
-
-  const lookup = {};
-  const total = ranking.length;
-  for (const r of ranking) lookup[r.hand] = r;
-
-  let maxAbs = 0;
-  if (useEVColor) {
-    for (const r of ranking) maxAbs = Math.max(maxAbs, Math.abs(r.value));
-    if (maxAbs === 0) maxAbs = 1;
-  }
-
-  let html = `<h3>Hand Grid</h3>`;
-  html += `<div class="hand-grid ${gridClass}">`;
-
-  for (let row = 0; row < n; row++) {
-    for (let col = 0; col < n; col++) {
-      const r1 = ranks[row], r2 = ranks[col];
-      let label;
-      if (row === col) label = r1 + r2;
-      else if (row < col) label = r1 + r2 + 's';
-      else label = r2 + r1 + 'o';
-
-      const entry = lookup[label];
-      const pct = entry ? (entry.rank / total * 100) : 100;
-      const inRange = pct >= rangePctMin && pct <= rangePctMax;
-
-      let bg;
-      if (entry && useEVColor) {
-        const val = entry.value;
-        const intensity = Math.min(Math.abs(val) / maxAbs, 1);
-        if (val > 0) {
-          const g = Math.round(40 + intensity * 80);
-          bg = `rgb(${Math.round(20 - intensity * 10)}, ${g}, ${Math.round(20 - intensity * 5)})`;
-        } else if (val < 0) {
-          const r_c = Math.round(40 + intensity * 80);
-          bg = `rgb(${r_c}, ${Math.round(20 - intensity * 10)}, ${Math.round(20 - intensity * 5)})`;
-        } else {
-          bg = 'rgb(35, 35, 45)';
-        }
-      } else if (entry) {
-        // Rank-based coloring (for range grid)
-        const strength = 1 - entry.rank / total;
-        const hue = strength * 120;
-        bg = `hsl(${hue}, 60%, 30%)`;
-      } else {
-        bg = 'rgb(20, 20, 30)';
+    // Show combo breakdown if board-specific and multiple combos
+    if (hasBoard && r.combos && r.combos.length > 1) {
+      for (const c of r.combos) {
+        const desc = groupDescs ? comboDescription(c.label, groupDescs) : c.label.split(':')[1]||'';
+        const cval = isRiver ? (c.value*100).toFixed(1)+'%' : (c.value>0?'+':'')+c.value.toFixed(4);
+        html+=`<tr class="combo-row"><td></td><td class="hand-col">${desc}</td><td>${cval}</td><td>${c.combos}</td></tr>`;
       }
-
-      const title = entry
-        ? `${label}: #${entry.rank}/${total} (${pct.toFixed(1)}%) | ${entry.value > 0 ? '+' : ''}${entry.value.toFixed(4)}`
-        : `${label}: n/a`;
-
-      html += `<div class="grid-cell ${inRange ? 'in-range' : 'out-range'}" `
-            + `style="background:${bg}" title="${title}">${label}</div>`;
     }
   }
-  html += '</div>';
-  container.innerHTML = html;
+  html+='</tbody></table>';
+  container.innerHTML=html;
 }
 
-// ── Initial load ──────────────────────────────────────────────────────────
+function renderGrid(ranking, container, ranks, pctMax, pctMin=0, useEV=true) {
+  const n=ranks.length, gc=n<=9?'grid-9':'grid-13';
+  const lookup={}; const total=ranking.length;
+  for (const r of ranking) lookup[r.label]=r;
+  let maxAbs=0;
+  if (useEV) for (const r of ranking) maxAbs=Math.max(maxAbs,Math.abs(r.avgValue));
+  if (!maxAbs) maxAbs=1;
 
-(async function() {
-  try {
-    await ensureData('sdPreflop', 'data/sd_preflop.json');
-    await ensureData('stdPreflop', 'data/std_preflop.json');
-    lookupRanking();
-  } catch(e) {
-    document.getElementById('ranking-status').innerHTML =
-      '<span class="error">Failed to load data. Make sure data/ files exist.</span>';
+  let html=`<h3>Hand Grid</h3><div class="hand-grid ${gc}">`;
+  for (let row=0;row<n;row++) for (let col=0;col<n;col++) {
+    const r1=ranks[row],r2=ranks[col];
+    let label; if(row===col)label=r1+r2; else if(row<col)label=r1+r2+'s'; else label=r2+r1+'o';
+    const e=lookup[label], pct=e?(e.rank/total*100):100;
+    const inR=pct>=pctMin&&pct<=pctMax;
+    let bg;
+    if (e&&useEV) {
+      const v=e.avgValue, intensity=Math.min(Math.abs(v)/maxAbs,1);
+      if(v>0) bg=`rgb(${Math.round(20-intensity*10)},${Math.round(40+intensity*80)},${Math.round(20-intensity*5)})`;
+      else if(v<0) bg=`rgb(${Math.round(40+intensity*80)},${Math.round(20-intensity*10)},${Math.round(20-intensity*5)})`;
+      else bg='rgb(35,35,45)';
+    } else if(e) { const s=1-e.rank/total; bg=`hsl(${s*120},60%,30%)`; }
+    else bg='rgb(20,20,30)';
+    const op=inR?1:0.25;
+    const t=e?`${label}: #${e.rank}/${total} | ${e.avgValue>0?'+':''}${e.avgValue.toFixed(4)}`:`${label}: n/a`;
+    html+=`<div class="grid-cell" style="background:${bg};opacity:${op}" title="${t}">${label}</div>`;
   }
+  html+='</div>'; container.innerHTML=html;
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+(async()=>{
+  try { await ensureData('sdPreflop','data/sd_preflop.json'); await ensureData('stdPreflop','data/std_preflop.json'); lookupRanking(); }
+  catch(e) { document.getElementById('ranking-status').innerHTML='<span class="error">Failed to load data</span>'; }
 })();
 </script>
-
 </body>
 </html>
