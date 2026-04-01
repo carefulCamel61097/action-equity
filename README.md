@@ -86,7 +86,7 @@ Preflop rankings use stratified opponent sampling with 1 million iterations per 
 
 ## Tools
 
-The [interactive tools page](https://carefulCamel61097.github.io/action-equity/) lets you:
+The [interactive tools page](https://carefulcamel61097.github.io/action-equity/) lets you:
 
 - **Look up rankings** on any short deck board (preflop, turn, or river)
 - **Explore ranges** by percentile with a visual hand grid
