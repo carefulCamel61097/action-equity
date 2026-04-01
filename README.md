@@ -40,6 +40,18 @@ This models natural poker dynamics:
 
 Action Equity measures **showdown value** -- how much a hand makes when it gets to the river. It undervalues bluffing hands and overvalues hands that are hard to play deceptively.
 
+### Example: JTs vs small pocket pairs in Short Deck
+
+A surprising result: in our VS Range simulation, **JTs actually loses money against small pocket pairs** like 66 and 77. This seems wrong -- JTs is one of the most popular hands in Short Deck, and small pairs are considered weak. What's going on?
+
+The issue is the free showdown. In our simulation, 66 gets to see all five board cards without paying anything. On most boards, 66 ends up with just a low pair -- bottom percentile, tiny pot, and JTs wins almost nothing. But on the ~12% of boards where 66 hits a set or better, it's suddenly a monster hand with a huge potential value, and JTs pays dearly.
+
+The math works out: 66 loses many micro-pots (stake near 1) but wins a few massive pots (stake near 10+). The weighted sum favors 66.
+
+In real poker, this doesn't happen. To see the flop, 66 has to call a raise. On the ~88% of flops where 66 misses, it faces a bet and folds. It never gets to realize those micro-wins. The cost of calling pre-flop and folding post-flop far outweighs the occasional set-mining payoff at these stack depths.
+
+This is the clearest example of Action Equity's limitation: **hands that are weak most of the time but occasionally very strong are overvalued**, because our model doesn't charge them for the many streets of betting they'd need to survive to reach showdown.
+
 ## What Changes in the Rankings?
 
 ### Standard Hold'em (52 cards)
