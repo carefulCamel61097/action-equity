@@ -432,6 +432,15 @@ document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>
 document.getElementById('board-input').addEventListener('keydown',e=>{if(e.key==='Enter')lookupRanking();});
 document.getElementById('hero-input').addEventListener('keydown',e=>{if(e.key==='Enter')runVsRange();});
 document.getElementById('vr-board-input').addEventListener('keydown',e=>{if(e.key==='Enter')runVsRange();});
+document.getElementById('vr-board-input').addEventListener('input',()=>{
+  // Auto-recommend exhaustive when board is given
+  const t=document.getElementById('vr-board-input').value.trim();
+  if (t) {
+    try { const n=parseCards(t).length;
+      if (n>=3 && simSpeed!=='exhaustive') { setSpeed(document.querySelector('[data-speed="exhaustive"]')); }
+    } catch(e){}
+  }
+});
 document.getElementById('board-input').addEventListener('input',()=>{
   try{const n=parseCards(document.getElementById('board-input').value).length;
   const s=n>=5?'river':n===4?'turn':n===3?'flop':'preflop'; currentStreet=s;
@@ -641,11 +650,9 @@ async function runVsRange() {
     const doExhaustive = isExhaustive && boardsToRun !== undefined && boardsToRun > 0 && boardsToRun <= 600;
     const numBoards = doExhaustive ? boardsToRun : {fast:500,medium:3000,slow:15000,exhaustive:15000}[simSpeed];
 
-    const loadingNote = Object.keys(DATA).filter(k=>k.startsWith('sd_rivers_')).length < 10
-      ? ' (first run loads data, subsequent runs are faster)' : '';
     statusEl.textContent = doExhaustive
-      ? `Running exhaustive: ${boardsToRun} board${boardsToRun>1?'s':''}...${loadingNote}`
-      : `Simulating ${numBoards} boards...${loadingNote}`;
+      ? `Running exhaustive: ${boardsToRun} board${boardsToRun>1?'s':''}... (loading board data)`
+      : `Simulating ${numBoards} boards... (loading board data, first run may be slower)`;
     progressBar.style.display='block'; progressFill.style.width='0%';
     document.getElementById('sim-btn').disabled=true;
     await new Promise(r=>setTimeout(r,20));
@@ -732,8 +739,8 @@ async function runVsRange() {
     resultEl.innerHTML=html;
 
     const pfRanking=preflopData.map((r,i)=>({label:r[0],avgValue:r[1],rank:i+1,totalCombos:null,combos:null}));
-    renderGrid(pfRanking,gridEl,ranks,rangeMax,rangeMin,true);
-    gridEl.innerHTML+='<div style="color:#666;font-size:0.75rem;margin-top:6px">Grid colors: preflop Action Equity (green = positive, red = negative). Highlighted = opponent range.</div>';
+    renderGrid(pfRanking,gridEl,ranks,rangeMax,rangeMin,false);
+    gridEl.innerHTML+='<div style="color:#666;font-size:0.75rem;margin-top:6px">Grid shows preflop hand strength ranking. Highlighted = hands in the selected opponent range.</div>';
     statusEl.textContent = doExhaustive
       ? `${heroLabel} vs ${rangeMin}%-${rangeMax}% (exhaustive, ${boardsUsed} boards)`
       : `${heroLabel} vs ${rangeMin}%-${rangeMax}% (${boardsUsed} boards)`;
