@@ -104,6 +104,10 @@ button:disabled { background: #555; cursor: not-allowed; }
       <input type="text" id="board-input" placeholder="e.g. Tc7sAc7d">
       <button onclick="lookupRanking()">Look Up</button>
       <button class="btn-secondary btn-small" onclick="randomBoard()">Random</button>
+      <div class="street-toggle" id="view-toggle" style="margin-left:auto">
+        <button class="street-btn active" data-view="grouped" onclick="setView(this)">Grouped</button>
+        <button class="street-btn" data-view="full" onclick="setView(this)">All combos</button>
+      </div>
     </div>
     <div id="card-display" class="card-display"></div>
     <div id="ranking-status" class="status"></div>
@@ -120,10 +124,11 @@ button:disabled { background: #555; cursor: not-allowed; }
       <label>Board:</label>
       <input type="text" id="vr-board-input" placeholder="optional">
       <button id="sim-btn" onclick="runVsRange()">Simulate</button>
-      <div class="speed-toggle">
-        <button class="speed-btn" data-speed="fast" onclick="setSpeed(this)">Fast</button>
-        <button class="speed-btn active" data-speed="medium" onclick="setSpeed(this)">Medium</button>
-        <button class="speed-btn" data-speed="slow" onclick="setSpeed(this)">Thorough</button>
+      <div class="speed-toggle" id="speed-toggle">
+        <button class="speed-btn" data-speed="fast" onclick="setSpeed(this)">Fast (500)</button>
+        <button class="speed-btn active" data-speed="medium" onclick="setSpeed(this)">Medium (3k)</button>
+        <button class="speed-btn" data-speed="slow" onclick="setSpeed(this)">Thorough (15k)</button>
+        <button class="speed-btn" data-speed="exhaustive" onclick="setSpeed(this)">Exhaustive</button>
       </div>
     </div>
     <div class="slider-row">
@@ -144,7 +149,8 @@ button:disabled { background: #555; cursor: not-allowed; }
 </div>
 
 <script>
-let currentVariant = 'sd', currentStreet = 'preflop', simSpeed = 'medium';
+let currentVariant = 'sd', currentStreet = 'preflop', simSpeed = 'medium', viewMode = 'grouped';
+let lastRankingData = null, lastBoardCards = null, lastIsRiver = false;
 const SD_RANKS = 'AKQJT9876', STD_RANKS = 'AKQJT98765432', SUIT_CHARS = 'shdc';
 const RANK_CHARS = () => currentVariant === 'sd' ? SD_RANKS : STD_RANKS;
 const DATA = {};
@@ -323,6 +329,71 @@ function setSpeed(btn) {
   document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
+function setView(btn) {
+  viewMode = btn.dataset.view;
+  document.querySelectorAll('#view-toggle .street-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if (lastRankingData) rerenderRanking();
+}
+
+// ── Suit group logic for expanding combos ──────────────────────────
+
+function buildSuitGroupMap(boardCards) {
+  const {suitMap} = canonicalizeBoard(boardCards);
+  // Count freq of each canonical suit on the board
+  const canonSuits = boardCards.map(c => suitMap[c.suit]);
+  const freq = {};
+  for (const cs of canonSuits) freq[cs] = (freq[cs]||0)+1;
+  // Group canonical suits by frequency
+  const f2s = {};
+  for (let cs = 0; cs < 4; cs++) {
+    const f = freq[cs]||0;
+    if (!f2s[f]) f2s[f] = [];
+    f2s[f].push(cs);
+  }
+  const groupMap = {};
+  let gid = 0;
+  for (const f of Object.keys(f2s).map(Number).sort((a,b)=>b-a)) {
+    for (const cs of f2s[f].sort()) groupMap[cs] = gid;
+    gid++;
+  }
+  // Inverse: canonical suit -> original suit
+  const invSuitMap = {};
+  for (const [orig, canon] of Object.entries(suitMap)) invSuitMap[canon] = parseInt(orig);
+  return {suitMap, groupMap, invSuitMap};
+}
+
+function getComboLabel(c1, c2, suitMap, groupMap) {
+  const cs1 = suitMap[c1.suit], cs2 = suitMap[c2.suit];
+  const g1 = groupMap[cs1], g2 = groupMap[cs2];
+  let rH = c1.rank, rL = c2.rank, gH = g1, gL = g2;
+  if (rH < rL) [rH, gH, rL, gL] = [rL, gL, rH, gH];
+  const ch1 = I2R[rH], ch2 = I2R[rL];
+  if (rH === rL) { const gs = [g1,g2].sort(); return ch1+ch2+':'+gs[0]+gs[1]; }
+  if (g1 === g2) return cs1===cs2 ? ch1+ch2+'s:'+g1 : ch1+ch2+'x:'+g1;
+  return ch1+ch2+'o:'+gH+gL;
+}
+
+function expandToFullRanking(rawRanking, boardCards) {
+  const {suitMap, groupMap} = buildSuitGroupMap(boardCards);
+  const boardIds = new Set(boardCards.map(cardId));
+  const remaining = buildDeck().filter(c => !boardIds.has(cardId(c)));
+  // Build lookup from combo label -> value
+  const labelVal = {};
+  for (const [cl, val, cnt] of rawRanking) labelVal[cl] = val;
+  // Enumerate all 2-card combos and map each to its label
+  const entries = [];
+  for (let i = 0; i < remaining.length; i++) {
+    for (let j = i+1; j < remaining.length; j++) {
+      const c1 = remaining[i], c2 = remaining[j];
+      const cl = getComboLabel(c1, c2, suitMap, groupMap);
+      const val = labelVal[cl];
+      if (val === undefined) continue;
+      entries.push({hand: cardStr(c1)+' '+cardStr(c2), value: val, label: getHandLabel(c1,c2)});
+    }
+  }
+  return entries;
+}
 function syncSliders() {
   const mn=document.getElementById('range-min'), mx=document.getElementById('range-max');
   if (parseInt(mn.value)>parseInt(mx.value)) { if (document.activeElement===mn) mx.value=mn.value; else mn.value=mx.value; }
@@ -461,10 +532,34 @@ async function lookupRanking() {
       statusEl.textContent=`${street.charAt(0).toUpperCase()+street.slice(1)} ranking for ${bs}`;
     }
 
-    const groupDescs = boardCards ? boardSuitGroups(boardCards) : null;
+    // Store for re-rendering on view toggle
+    lastRankingData = {ranking, rawRanking: boardCards ? await loadBoardRanking(boardCards, street) : null, isRiver};
+    lastBoardCards = boardCards;
+    lastIsRiver = isRiver;
+    rerenderRanking();
+  } catch(e) { statusEl.innerHTML=`<span class="error">${e.message}</span>`; }
+}
+
+function rerenderRanking() {
+  const resultEl = document.getElementById('ranking-result');
+  const gridEl = document.getElementById('ranking-grid');
+  const {ranking, rawRanking, isRiver} = lastRankingData;
+  const ranks = RANK_CHARS();
+  const groupDescs = lastBoardCards ? boardSuitGroups(lastBoardCards) : null;
+
+  if (viewMode === 'full' && rawRanking && lastBoardCards) {
+    // Expand to every concrete combo
+    let entries = expandToFullRanking(rawRanking, lastBoardCards);
+    if (isRiver) entries.sort((a,b) => a.value - b.value);
+    else entries.sort((a,b) => b.value - a.value);
+    entries.forEach((e,i) => e.rank = i+1);
+    renderFullRanking(entries, resultEl, isRiver);
+    // Grid still uses grouped data
+    renderGrid(ranking, gridEl, ranks, 100, 0, !isRiver);
+  } else {
     renderRanking(ranking, resultEl, isRiver, groupDescs);
     renderGrid(ranking, gridEl, ranks, 100, 0, !isRiver);
-  } catch(e) { statusEl.innerHTML=`<span class="error">${e.message}</span>`; }
+  }
 }
 
 // ── VS Range simulation ───────────────────────────────────────────
@@ -505,54 +600,90 @@ async function runVsRange() {
     const oppLabels=new Set(preflopData.slice(minIdx,maxIdx).map(r=>r[0]).filter(l=>l!==heroLabel));
     if (!oppLabels.size) {statusEl.innerHTML='<span class="error">No opponents in range</span>';return;}
 
-    const numBoards={fast:200,medium:1000,slow:5000}[simSpeed];
-    statusEl.textContent=`Simulating ${numBoards} boards...`;
-    progressBar.style.display='block'; progressFill.style.width='0%';
-    document.getElementById('sim-btn').disabled=true;
-    await new Promise(r=>setTimeout(r,20));
-
     const excludeIds=new Set([...heroCardIds,...fixedBoard.map(cardId)]);
     const remainingDeck=buildDeck().filter(c=>!excludeIds.has(cardId(c)));
     const cardsToComplete=5-fixedBoard.length;
 
+    // Determine if exhaustive is feasible
+    const isExhaustive = simSpeed === 'exhaustive' || (fixedBoard.length >= 4 && simSpeed !== 'fast');
+    let boardsToRun;
+    if (isExhaustive && fixedBoard.length >= 4) {
+      // Turn: 32 completions, River: 1
+      boardsToRun = cardsToComplete === 0 ? 1 : cardsToComplete === 1 ? remainingDeck.length : -1;
+    }
+    if (isExhaustive && fixedBoard.length === 3) {
+      // Flop: C(remaining, 2) completions
+      boardsToRun = remainingDeck.length * (remainingDeck.length - 1) / 2;
+    }
+    const doExhaustive = isExhaustive && boardsToRun !== undefined && boardsToRun > 0 && boardsToRun <= 600;
+    const numBoards = doExhaustive ? boardsToRun : {fast:500,medium:3000,slow:15000,exhaustive:15000}[simSpeed];
+
+    statusEl.textContent = doExhaustive
+      ? `Running exhaustive: ${boardsToRun} board${boardsToRun>1?'s':''}...`
+      : `Simulating ${numBoards} boards...`;
+    progressBar.style.display='block'; progressFill.style.width='0%';
+    document.getElementById('sim-btn').disabled=true;
+    await new Promise(r=>setTimeout(r,20));
+
     let totalWEV=0, totalW=0, wins=0, losses=0, ties=0, boardsUsed=0;
-    const BATCH=50;
 
-    for (let batch=0; batch<numBoards; batch+=BATCH) {
-      for (let b=batch; b<Math.min(batch+BATCH,numBoards); b++) {
-        const deck=shuffle([...remainingDeck]);
-        const board=[...fixedBoard,...deck.slice(0,cardsToComplete)];
-        const ck=chunkKey(board);
-        const dataKey='sd_rivers_'+ck;
-        let chunkData;
-        try { chunkData=await ensureData(dataKey,'data/'+dataKey+'.json'); } catch(e) { continue; }
-        const {key}=canonicalizeBoard(board);
-        const boardRanking=chunkData[key];
-        if (!boardRanking) continue;
-
-        // Group by base label to get percentiles
-        const grouped=groupByBaseLabel(boardRanking);
-        grouped.sort((a,b)=>a.avgValue-b.avgValue);
-        const labelPct={};
-        for (let i=0;i<grouped.length;i++) labelPct[grouped[i].label]=(i+1)/grouped.length;
-
-        const heroPct=labelPct[heroLabel];
-        if (!heroPct) continue;
-        const heroVal=1/heroPct;
-
-        for (const opp of oppLabels) {
-          const oppPct=labelPct[opp];
-          if (!oppPct) continue;
-          const stake=Math.min(heroVal,1/oppPct);
-          totalW+=stake;
-          if (heroPct<oppPct) {totalWEV+=stake;wins++;}
-          else if (heroPct>oppPct) {totalWEV-=stake;losses++;}
-          else ties++;
-        }
-        boardsUsed++;
+    // Helper to process one complete board
+    async function processBoard(board) {
+      const ck=chunkKey(board);
+      const dataKey='sd_rivers_'+ck;
+      let chunkData;
+      try { chunkData=await ensureData(dataKey,'data/'+dataKey+'.json'); } catch(e) { return; }
+      const {key}=canonicalizeBoard(board);
+      const boardRanking=chunkData[key];
+      if (!boardRanking) return;
+      const grouped=groupByBaseLabel(boardRanking);
+      grouped.sort((a,b)=>a.avgValue-b.avgValue);
+      const labelPct={};
+      for (let i=0;i<grouped.length;i++) labelPct[grouped[i].label]=(i+1)/grouped.length;
+      const heroPct=labelPct[heroLabel];
+      if (!heroPct) return;
+      const heroVal=1/heroPct;
+      for (const opp of oppLabels) {
+        const oppPct=labelPct[opp]; if (!oppPct) continue;
+        const stake=Math.min(heroVal,1/oppPct);
+        totalW+=stake;
+        if (heroPct<oppPct) {totalWEV+=stake;wins++;}
+        else if (heroPct>oppPct) {totalWEV-=stake;losses++;}
+        else ties++;
       }
-      progressFill.style.width=Math.min(100,((batch+BATCH)/numBoards)*100)+'%';
-      await new Promise(r=>setTimeout(r,0));
+      boardsUsed++;
+    }
+
+    if (doExhaustive) {
+      // Enumerate all completions
+      if (cardsToComplete === 0) {
+        await processBoard([...fixedBoard]);
+      } else if (cardsToComplete === 1) {
+        for (let i=0; i<remainingDeck.length; i++) {
+          await processBoard([...fixedBoard, remainingDeck[i]]);
+          if (i%8===0) { progressFill.style.width=(i/remainingDeck.length*100)+'%'; await new Promise(r=>setTimeout(r,0)); }
+        }
+      } else if (cardsToComplete === 2) {
+        let done = 0;
+        for (let i=0; i<remainingDeck.length; i++) {
+          for (let j=i+1; j<remainingDeck.length; j++) {
+            await processBoard([...fixedBoard, remainingDeck[i], remainingDeck[j]]);
+            done++;
+            if (done%50===0) { progressFill.style.width=(done/boardsToRun*100)+'%'; await new Promise(r=>setTimeout(r,0)); }
+          }
+        }
+      }
+    } else {
+      // Monte Carlo
+      const BATCH=100;
+      for (let batch=0; batch<numBoards; batch+=BATCH) {
+        for (let b=batch; b<Math.min(batch+BATCH,numBoards); b++) {
+          const deck=shuffle([...remainingDeck]);
+          await processBoard([...fixedBoard,...deck.slice(0,cardsToComplete)]);
+        }
+        progressFill.style.width=Math.min(100,((batch+BATCH)/numBoards)*100)+'%';
+        await new Promise(r=>setTimeout(r,0));
+      }
     }
 
     document.getElementById('sim-btn').disabled=false;
@@ -566,7 +697,8 @@ async function runVsRange() {
     html+=`<div class="hero-info">Hero: <strong class="${handCssClass(heroLabel)}">${heroLabel}</strong>`;
     if (fixedBoard.length) html+=` on ${fixedBoard.map(c=>cardStr(c)).join(' ')}`;
     html+=`</div>`;
-    html+=`<div style="margin:8px 0">Range: ${rangeMin}%-${rangeMax}% (${oppLabels.size} types) | ${boardsUsed} boards</div>`;
+    const modeStr = doExhaustive ? 'exhaustive' : `${boardsUsed} boards (Monte Carlo)`;
+    html+=`<div style="margin:8px 0">Range: ${rangeMin}%-${rangeMax}% (${oppLabels.size} types) | ${modeStr}</div>`;
     const cls=ae>0?'good':ae<0?'bad':'neutral';
     html+=`<div style="margin-top:12px"><span class="metric ${cls}" style="font-size:1.1rem">AE vs range: ${ae>0?'+':''}${ae.toFixed(4)}</span></div>`;
     html+=`<div style="margin-top:8px"><span class="metric good">W:${wins.toLocaleString()}</span> <span class="metric bad">L:${losses.toLocaleString()}</span>`;
@@ -585,6 +717,21 @@ async function runVsRange() {
 }
 
 // ── Rendering ──────────────────────────────────────────────────────
+
+function renderFullRanking(entries, container, isRiver) {
+  const valLabel = isRiver ? 'Percentile' : 'Action Equity';
+  let html='<table class="ranking-table"><thead><tr>';
+  html+=`<th class="rank-col">#</th><th class="hand-col">Hand</th><th class="hand-col">Cards</th><th>${valLabel}</th>`;
+  html+='</tr></thead><tbody>';
+  for (const e of entries) {
+    const cls = handCssClass(e.label);
+    const val = isRiver ? (e.value*100).toFixed(1)+'%' : (e.value>0?'+':'')+e.value.toFixed(4);
+    html+=`<tr><td class="rank-col">${e.rank}</td><td class="hand-col ${cls}">${e.label}</td>`;
+    html+=`<td>${e.hand}</td><td>${val}</td></tr>`;
+  }
+  html+='</tbody></table>';
+  container.innerHTML=html;
+}
 
 function renderRanking(ranking, container, isRiver, groupDescs) {
   const valLabel = isRiver ? 'Percentile' : 'Action Equity';
