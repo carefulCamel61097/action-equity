@@ -658,6 +658,9 @@ async function runVsRange() {
     await new Promise(r=>setTimeout(r,20));
 
     let totalWEV=0, totalW=0, wins=0, losses=0, ties=0, boardsUsed=0;
+    // Per-opponent tracking for grid coloring
+    const perOpp = {}; // label -> {wev, weight}
+    for (const opp of oppLabels) perOpp[opp] = {wev:0, weight:0};
 
     // Helper to process one complete board
     async function processBoard(board) {
@@ -679,8 +682,10 @@ async function runVsRange() {
         const oppPct=labelPct[opp]; if (!oppPct) continue;
         const stake=Math.min(heroVal,1/oppPct);
         totalW+=stake;
-        if (heroPct<oppPct) {totalWEV+=stake;wins++;}
-        else if (heroPct>oppPct) {totalWEV-=stake;losses++;}
+        const po = perOpp[opp];
+        po.weight+=stake;
+        if (heroPct<oppPct) {totalWEV+=stake;wins++; po.wev+=stake;}
+        else if (heroPct>oppPct) {totalWEV-=stake;losses++; po.wev-=stake;}
         else ties++;
       }
       boardsUsed++;
@@ -738,9 +743,15 @@ async function runVsRange() {
     html+=` <span class="metric ${wr>=50?'good':'bad'}">WR:${wr.toFixed(1)}%</span></div></div>`;
     resultEl.innerHTML=html;
 
-    const pfRanking=preflopData.map((r,i)=>({label:r[0],avgValue:r[1],rank:i+1,totalCombos:null,combos:null}));
-    renderGrid(pfRanking,gridEl,ranks,rangeMax,rangeMin,false);
-    gridEl.innerHTML+='<div style="color:#666;font-size:0.75rem;margin-top:6px">Grid shows preflop hand strength ranking. Highlighted = hands in the selected opponent range.</div>';
+    // Build grid ranking with per-opponent AE from hero's perspective
+    const oppAeRanking = preflopData.map((r,i) => {
+      const label = r[0];
+      const po = perOpp[label];
+      const heroAeVsThis = (po && po.weight > 0) ? po.wev / po.weight : 0;
+      return {label, avgValue: heroAeVsThis, rank: i+1, totalCombos:null, combos:null};
+    });
+    renderGrid(oppAeRanking, gridEl, ranks, rangeMax, rangeMin, true);
+    gridEl.innerHTML+='<div style="color:#666;font-size:0.75rem;margin-top:6px">Grid colors: hero\'s AE against each opponent (green = hero profits, red = hero loses). Highlighted = in range.</div>';
     statusEl.textContent = doExhaustive
       ? `${heroLabel} vs ${rangeMin}%-${rangeMax}% (exhaustive, ${boardsUsed} boards)`
       : `${heroLabel} vs ${rangeMin}%-${rangeMax}% (${boardsUsed} boards)`;
