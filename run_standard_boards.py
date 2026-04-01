@@ -8,23 +8,26 @@ Computes rankings for all standard 52-card boards in stages:
             C(52,5) = 2,598,960 boards (~134K canonical)
 
   Stage 2: All turn rankings (estimated ~5-6 days on Pi)
-            For each turn, run out every river card, use river ranking
-            to get percentiles, compute AE.
+            For each turn, run out every river card, compute river
+            ranking on the fly, then compute AE.
             C(52,4) = 270,725 boards (~16K canonical)
 
   Stage 3: All flop rankings (estimated 1-2 weeks on Pi)
-            For each flop, run out every turn+river, use river ranking.
+            For each flop, run out every turn+river, compute river
+            ranking on the fly.
             C(52,3) = 22,100 boards (~1,833 canonical)
+
+Memory-efficient: stages 2 and 3 compute river rankings on the fly
+instead of loading a multi-GB cache. Each stage is self-contained.
 
 Usage:
     python3 run_standard_boards.py              # run all stages
     python3 run_standard_boards.py --stage 1    # run specific stage
-    python3 run_standard_boards.py --stage 2    # turns only (needs stage 1 pkl)
-    python3 run_standard_boards.py --stage 3    # flops only (needs stage 1 pkl)
+    python3 run_standard_boards.py --stage 2    # turns only
+    python3 run_standard_boards.py --stage 3    # flops only
 
 Output:
-    std_stage1_rivers.pkl    — cached river data
-    std_stage2_turns.pkl     — cached turn rankings
+    std_stage2_turns.pkl     — cached turn rankings (for stage 3b if added)
     std_stage3_flops.pkl     — cached flop rankings
     std_results_rivers.csv   — overall river ranking
     std_results_turns.csv    — overall turn ranking
@@ -37,7 +40,7 @@ import csv
 import time
 import pickle
 from itertools import combinations
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 from treys import Card, Deck
 from evaluator import StandardEvaluator
@@ -51,6 +54,33 @@ RANKS_STR = evaluator.RANKS
 MAX_RANK = evaluator.MAX_RANK
 
 TREYS_SUITS = sorted(set(Card.get_suit_int(c) for c in DECK))
+
+
+# ── LRU cache ────────────────────────────────────────────────────────────────
+
+class LRU:
+    """Simple LRU cache to limit memory usage."""
+    def __init__(self, maxsize=200):
+        self._cache = OrderedDict()
+        self._maxsize = maxsize
+        self.hits = 0
+        self.misses = 0
+
+    def get(self, key):
+        if key in self._cache:
+            self._cache.move_to_end(key)
+            self.hits += 1
+            return self._cache[key]
+        self.misses += 1
+        return None
+
+    def put(self, key, value):
+        if key in self._cache:
+            self._cache.move_to_end(key)
+        else:
+            if len(self._cache) >= self._maxsize:
+                self._cache.popitem(last=False)
+        self._cache[key] = value
 
 
 # ── Canonicalisation helpers ─────────────────────────────────────────────────
@@ -137,10 +167,14 @@ def compute_river_ranking(board_cards):
     return ranking
 
 
-# ── Core: compute AE on a turn board using river rankings ────────────────────
+# ── Core: compute AE on a turn board (river rankings computed on the fly) ────
 
-def compute_turn_ae(board_4, river_cache):
-    """Compute action equity for all hands on a 4-card board."""
+def compute_turn_ae(board_4, _unused=None):
+    """Compute action equity for all hands on a 4-card board.
+
+    Computes river rankings on the fly for each possible river card.
+    No pre-loaded river cache needed.
+    """
     _, suit_map = canonicalize_board(board_4)
     board_set = set(board_4)
     remaining = [c for c in DECK if c not in board_set]
@@ -150,14 +184,17 @@ def compute_turn_ae(board_4, river_cache):
         "weighted_ev": 0.0, "total_weight": 0.0,
     })
 
+    # Local cache for river rankings within this turn board
+    local_cache = {}
+
     for river_card in remaining:
         full_board = board_4 + [river_card]
         full_board_set = board_set | {river_card}
 
         canon_river, river_suit_map = canonicalize_board(full_board)
-        if canon_river not in river_cache:
-            river_cache[canon_river] = compute_river_ranking(full_board)
-        river_ranking = river_cache[canon_river]
+        if canon_river not in local_cache:
+            local_cache[canon_river] = compute_river_ranking(full_board)
+        river_ranking = local_cache[canon_river]
 
         avail = [c for c in DECK if c not in full_board_set]
         hands = list(combinations(avail, 2))
@@ -205,9 +242,83 @@ def compute_turn_ae(board_4, river_cache):
     return result
 
 
+# ── Core: compute AE on a flop (river rankings computed on the fly) ──────────
+
+def compute_flop_ae_full(board_3, _unused=None):
+    """Compute AE for all hands on a 3-card flop by running out to the river.
+
+    Computes river rankings on the fly for each turn+river completion.
+    """
+    _, suit_map = canonicalize_board(board_3)
+    board_set = set(board_3)
+    remaining = [c for c in DECK if c not in board_set]
+
+    stats = defaultdict(lambda: {
+        "wins": 0, "ties": 0, "losses": 0,
+        "weighted_ev": 0.0, "total_weight": 0.0,
+    })
+
+    completions = list(combinations(remaining, 2))
+    local_cache = {}
+
+    for turn_c, river_c in completions:
+        full_board = board_3 + [turn_c, river_c]
+        full_board_set = board_set | {turn_c, river_c}
+
+        canon_river, river_suit_map = canonicalize_board(full_board)
+        if canon_river not in local_cache:
+            local_cache[canon_river] = compute_river_ranking(full_board)
+        river_ranking = local_cache[canon_river]
+
+        avail = [c for c in DECK if c not in full_board_set]
+        hands = list(combinations(avail, 2))
+
+        hand_pcts = {}
+        for h in hands:
+            hk_river = hand_key(h[0], h[1], river_suit_map)
+            hand_pcts[h] = river_ranking[hk_river]
+
+        for hero in hands:
+            hero_pct = hand_pcts[hero]
+            hero_val = 1.0 / hero_pct
+            hero_set = set(hero)
+            hero_tk = hand_key(hero[0], hero[1], suit_map)
+
+            s = stats[hero_tk]
+            for opp in hands:
+                if opp[0] in hero_set or opp[1] in hero_set:
+                    continue
+
+                opp_pct = hand_pcts[opp]
+                opp_val = 1.0 / opp_pct
+                stake = min(hero_val, opp_val)
+
+                s["total_weight"] += stake
+
+                if hero_pct < opp_pct:
+                    s["wins"] += 1
+                    s["weighted_ev"] += stake
+                elif hero_pct == opp_pct:
+                    s["ties"] += 1
+                else:
+                    s["losses"] += 1
+                    s["weighted_ev"] -= stake
+
+    result = {}
+    for hk, s in stats.items():
+        total = s["wins"] + s["ties"] + s["losses"]
+        if total == 0:
+            continue
+        raw_eq = (s["wins"] + s["ties"] * 0.5) / total
+        norm_ae = s["weighted_ev"] / s["total_weight"] if s["total_weight"] else 0
+        result[hk] = (raw_eq, norm_ae)
+
+    return result
+
+
 # ── Aggregate and save ───────────────────────────────────────────────────────
 
-def aggregate_to_169(all_boards_iter, compute_fn, street_name, cache_arg=None):
+def aggregate_to_169(all_boards_iter, compute_fn, street_name):
     """Run computation over all boards, aggregate by 169-hand labels."""
     overall = defaultdict(lambda: {"raw_eq_sum": 0.0, "norm_ae_sum": 0.0, "count": 0})
     computed_cache = {}
@@ -220,10 +331,7 @@ def aggregate_to_169(all_boards_iter, compute_fn, street_name, cache_arg=None):
         canon, suit_map = canonicalize_board(board)
 
         if canon not in computed_cache:
-            if cache_arg is not None:
-                ae_data = compute_fn(board, cache_arg)
-            else:
-                ae_data = compute_fn(board)
+            ae_data = compute_fn(board)
             computed_cache[canon] = ae_data
             boards_computed += 1
 
@@ -301,27 +409,33 @@ def save_ranking_csv(overall, csv_path):
     print(f"\n  Saved to {csv_path}")
 
 
-# ── River ranking (simple: just hand strength) ───────────────────────────────
+# ── River ranking (memory-efficient with LRU cache) ───────────────────────
 
 def aggregate_rivers():
-    """For rivers, ranking is just hand strength."""
+    """For rivers, ranking is just hand strength.
+
+    Uses an LRU cache to limit memory: consecutive boards in
+    combinations() order often share the same canonical form,
+    so a small cache gives a high hit rate.
+    """
     all_boards = list(combinations(DECK, 5))
     total = len(all_boards)
-    computed_cache = {}
 
     overall = defaultdict(lambda: {"pct_sum": 0.0, "count": 0})
     t0 = time.time()
+
+    cache = LRU(maxsize=200)
     boards_computed = 0
 
     for b_idx, board in enumerate(all_boards, 1):
         board_list = list(board)
         canon, suit_map = canonicalize_board(board_list)
 
-        if canon not in computed_cache:
-            computed_cache[canon] = compute_river_ranking(board_list)
+        ranking = cache.get(canon)
+        if ranking is None:
+            ranking = compute_river_ranking(board_list)
+            cache.put(canon, ranking)
             boards_computed += 1
-
-        ranking = computed_cache[canon]
 
         board_set = set(board)
         remaining = [c for c in DECK if c not in board_set]
@@ -337,12 +451,16 @@ def aggregate_rivers():
             elapsed = time.time() - t0
             rate = b_idx / elapsed
             eta = (total - b_idx) / rate if rate else 0
+            hr = cache.hits / max(1, cache.hits + cache.misses) * 100
             print(f"  [{b_idx:>9,}/{total:,}] ({boards_computed} unique)  "
-                  f"elapsed {elapsed/60:6.1f}min  ETA {eta/60:6.1f}min", flush=True)
+                  f"elapsed {elapsed/60:6.1f}min  ETA {eta/60:6.1f}min  "
+                  f"cache hit {hr:.0f}%", flush=True)
 
     elapsed = time.time() - t0
     print(f"\n  Completed in {elapsed:.1f}s ({elapsed/60:.1f} min / {elapsed/3600:.1f} hrs)")
-    print(f"  Boards: {total:,} total, {boards_computed} unique (canonical)")
+    print(f"  Boards: {total:,} total, {boards_computed} unique")
+    print(f"  LRU cache: {cache.hits:,} hits, {cache.misses:,} misses "
+          f"({cache.hits/(cache.hits+cache.misses)*100:.1f}% hit rate)")
 
     results = []
     for label, g in overall.items():
@@ -372,45 +490,32 @@ def aggregate_rivers():
                              f"{entry['avg_pct']:.6f}", i])
     print(f"\n  Saved to {csv_path}")
 
-    return computed_cache
-
 
 # ── Stage runners ────────────────────────────────────────────────────────────
 
 def run_stage_1():
-    """Stage 1: All river rankings."""
+    """Stage 1: All river rankings (aggregated only, no cache saved)."""
     print("\n" + "=" * 60)
     print("  STAGE 1: All Standard Deck River Rankings")
     print("  C(52,5) = 2,598,960 boards")
+    print("  Memory-efficient: LRU cache, no full cache saved")
     print("=" * 60 + "\n")
 
     t0 = time.time()
-    river_cache = aggregate_rivers()
-
-    pkl_path = "std_stage1_rivers.pkl"
-    with open(pkl_path, "wb") as f:
-        pickle.dump(river_cache, f)
-    print(f"  River cache saved to {pkl_path} ({len(river_cache)} canonical boards)")
+    aggregate_rivers()
 
     elapsed = time.time() - t0
     print(f"\n  Stage 1 total: {elapsed:.1f}s ({elapsed/60:.1f} min / {elapsed/3600:.1f} hrs)")
-    return river_cache
 
 
-def run_stage_2(river_cache=None):
-    """Stage 2: All turn rankings."""
+def run_stage_2():
+    """Stage 2: All turn rankings (computes river rankings on the fly)."""
     print("\n" + "=" * 60)
     print("  STAGE 2: All Standard Deck Turn Rankings")
     print("  C(52,4) = 270,725 boards (~16K canonical)")
+    print("  River rankings computed on the fly (no cache needed)")
     print("  WARNING: This will take several days!")
     print("=" * 60 + "\n")
-
-    if river_cache is None:
-        pkl_path = "std_stage1_rivers.pkl"
-        print(f"  Loading river cache from {pkl_path} ...")
-        with open(pkl_path, "rb") as f:
-            river_cache = pickle.load(f)
-        print(f"  Loaded {len(river_cache)} canonical river boards\n")
 
     all_boards = [list(b) for b in combinations(DECK, 4)]
     total = len(all_boards)
@@ -419,7 +524,7 @@ def run_stage_2(river_cache=None):
     t0 = time.time()
 
     overall, turn_cache = aggregate_to_169(
-        all_boards, compute_turn_ae, "turn", cache_arg=river_cache
+        all_boards, compute_turn_ae, "turn"
     )
 
     save_ranking_csv(overall, "std_results_turns.csv")
@@ -432,91 +537,16 @@ def run_stage_2(river_cache=None):
     elapsed = time.time() - t0
     print(f"\n  Stage 2 total: {elapsed:.1f}s ({elapsed/60:.1f} min / "
           f"{elapsed/3600:.1f} hrs / {elapsed/86400:.1f} days)")
-    return turn_cache
 
 
-def compute_flop_ae_full(board_3, river_cache):
-    """Compute AE for all hands on a 3-card flop by running out to the river."""
-    _, suit_map = canonicalize_board(board_3)
-    board_set = set(board_3)
-    remaining = [c for c in DECK if c not in board_set]
-
-    stats = defaultdict(lambda: {
-        "wins": 0, "ties": 0, "losses": 0,
-        "weighted_ev": 0.0, "total_weight": 0.0,
-    })
-
-    completions = list(combinations(remaining, 2))
-
-    for turn_c, river_c in completions:
-        full_board = board_3 + [turn_c, river_c]
-        full_board_set = board_set | {turn_c, river_c}
-
-        canon_river, river_suit_map = canonicalize_board(full_board)
-        if canon_river not in river_cache:
-            river_cache[canon_river] = compute_river_ranking(full_board)
-        river_ranking = river_cache[canon_river]
-
-        avail = [c for c in DECK if c not in full_board_set]
-        hands = list(combinations(avail, 2))
-
-        hand_pcts = {}
-        for h in hands:
-            hk_river = hand_key(h[0], h[1], river_suit_map)
-            hand_pcts[h] = river_ranking[hk_river]
-
-        for hero in hands:
-            hero_pct = hand_pcts[hero]
-            hero_val = 1.0 / hero_pct
-            hero_set = set(hero)
-            hero_tk = hand_key(hero[0], hero[1], suit_map)
-
-            s = stats[hero_tk]
-            for opp in hands:
-                if opp[0] in hero_set or opp[1] in hero_set:
-                    continue
-
-                opp_pct = hand_pcts[opp]
-                opp_val = 1.0 / opp_pct
-                stake = min(hero_val, opp_val)
-
-                s["total_weight"] += stake
-
-                if hero_pct < opp_pct:
-                    s["wins"] += 1
-                    s["weighted_ev"] += stake
-                elif hero_pct == opp_pct:
-                    s["ties"] += 1
-                else:
-                    s["losses"] += 1
-                    s["weighted_ev"] -= stake
-
-    result = {}
-    for hk, s in stats.items():
-        total = s["wins"] + s["ties"] + s["losses"]
-        if total == 0:
-            continue
-        raw_eq = (s["wins"] + s["ties"] * 0.5) / total
-        norm_ae = s["weighted_ev"] / s["total_weight"] if s["total_weight"] else 0
-        result[hk] = (raw_eq, norm_ae)
-
-    return result
-
-
-def run_stage_3(river_cache=None):
-    """Stage 3: All flop rankings (full method — run out to river)."""
+def run_stage_3():
+    """Stage 3: All flop rankings (computes river rankings on the fly)."""
     print("\n" + "=" * 60)
     print("  STAGE 3: All Standard Deck Flop Rankings (Full Method)")
     print("  C(52,3) = 22,100 boards (~1,833 canonical)")
+    print("  River rankings computed on the fly (no cache needed)")
     print("  WARNING: This may take 1-2 weeks!")
     print("=" * 60 + "\n")
-
-    if river_cache is None:
-        pkl_path = "std_stage1_rivers.pkl"
-        print(f"  Loading river cache from {pkl_path} ...")
-        with open(pkl_path, "rb") as f:
-            river_cache = pickle.load(f)
-        print(f"  Loaded {len(river_cache)} canonical river boards\n")
 
     all_boards = [list(b) for b in combinations(DECK, 3)]
     total = len(all_boards)
@@ -525,7 +555,7 @@ def run_stage_3(river_cache=None):
     t0 = time.time()
 
     overall, flop_cache = aggregate_to_169(
-        all_boards, compute_flop_ae_full, "flop", cache_arg=river_cache
+        all_boards, compute_flop_ae_full, "flop"
     )
 
     save_ranking_csv(overall, "std_results_flops.csv")
@@ -553,17 +583,13 @@ def main():
     t_start = time.time()
 
     if stage is None or stage == "1":
-        river_cache = run_stage_1()
-    else:
-        river_cache = None
+        run_stage_1()
 
     if stage is None or stage == "2":
-        turn_cache = run_stage_2(river_cache)
-    else:
-        turn_cache = None
+        run_stage_2()
 
     if stage is None or stage == "3":
-        run_stage_3(river_cache)
+        run_stage_3()
 
     total = time.time() - t_start
     print(f"\n{'=' * 60}")
