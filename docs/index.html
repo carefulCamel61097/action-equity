@@ -13,7 +13,6 @@ h3 { color: #c0c0c0; margin-bottom: 8px; font-size: 1rem; }
 
 .container { max-width: 1200px; margin: 0 auto; padding: 0 16px 40px; }
 
-/* Variant toggle */
 .variant-bar { text-align: center; margin-bottom: 16px; }
 .variant-toggle { display: inline-flex; border: 1px solid #0f3460; border-radius: 8px; overflow: hidden; }
 .variant-toggle button { padding: 8px 20px; background: #16213e; color: #a0a0a0; border: none;
@@ -21,7 +20,6 @@ h3 { color: #c0c0c0; margin-bottom: 8px; font-size: 1rem; }
 .variant-toggle button.active { background: #0f3460; color: #e94560; }
 .variant-toggle button:hover:not(.active) { color: #e0e0e0; }
 
-/* Tabs */
 .tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
 .tab { padding: 10px 20px; background: #16213e; border: 1px solid #0f3460; border-radius: 8px 8px 0 0;
        cursor: pointer; color: #a0a0a0; transition: all 0.2s; }
@@ -30,7 +28,6 @@ h3 { color: #c0c0c0; margin-bottom: 8px; font-size: 1rem; }
 .panel { display: none; }
 .panel.active { display: block; }
 
-/* Street toggle */
 .street-toggle { display: inline-flex; border: 1px solid #0f3460; border-radius: 6px; overflow: hidden; margin-right: 12px; }
 .street-btn { padding: 8px 16px; background: #16213e; color: #a0a0a0; border: none; border-right: 1px solid #0f3460;
   cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
@@ -38,7 +35,6 @@ h3 { color: #c0c0c0; margin-bottom: 8px; font-size: 1rem; }
 .street-btn.active { background: #0f3460; color: #e94560; }
 .street-btn:hover:not(.active) { color: #e0e0e0; }
 
-/* Board input */
 .input-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
 .input-row label { color: #a0a0a0; font-size: 0.9rem; }
 .input-row input { padding: 8px 12px; background: #16213e; border: 1px solid #0f3460;
@@ -53,11 +49,11 @@ button:disabled { background: #555; cursor: not-allowed; }
 .btn-small { padding: 6px 12px; font-size: 0.8rem; }
 .status { color: #a0a0a0; font-size: 0.85rem; margin-top: 8px; min-height: 20px; }
 .error { color: #e94560; }
+.note { color: #666; font-size: 0.8rem; font-style: italic; margin-top: 4px; }
 .card-display { font-size: 0.95rem; margin-top: 4px; }
 .card-display .used { color: #e0e0e0; font-weight: 600; }
 .card-display .unused { color: #666; text-decoration: line-through; }
 
-/* Ranking table */
 .ranking-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.9rem; }
 .ranking-table th { text-align: left; padding: 8px 12px; background: #16213e; color: #a0a0a0;
   border-bottom: 2px solid #0f3460; position: sticky; top: 0; z-index: 1; }
@@ -69,7 +65,6 @@ button:disabled { background: #555; cursor: not-allowed; }
 .ranking-table .offsuit { color: #4ec5d4; }
 .ranking-table .pair { color: #ffc107; }
 
-/* Hand grid */
 .hand-grid { display: grid; gap: 2px; width: fit-content; }
 .grid-9 { grid-template-columns: repeat(9, 38px); }
 .grid-13 { grid-template-columns: repeat(13, 34px); }
@@ -79,12 +74,10 @@ button:disabled { background: #555; cursor: not-allowed; }
 .grid-cell.out-range { opacity: 0.25; }
 .grid-cell:hover { transform: scale(1.15); z-index: 1; }
 
-/* Slider */
 .slider-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
 .slider-row input[type="range"] { flex: 1; min-width: 150px; accent-color: #e94560; }
 .slider-label { font-size: 0.9rem; color: #a0a0a0; min-width: 60px; }
 
-/* VS Range results */
 .vs-range-results { margin-top: 16px; padding: 16px; background: #16213e; border-radius: 8px; }
 .vs-range-results .hero-info { font-size: 1.1rem; margin-bottom: 12px; }
 .metric { display: inline-block; padding: 4px 10px; border-radius: 4px; margin: 2px; font-size: 0.85rem; }
@@ -92,19 +85,20 @@ button:disabled { background: #555; cursor: not-allowed; }
 .metric.bad { background: #4a1a1a; color: #ef5350; }
 .metric.neutral { background: #2a2a4a; color: #a0a0a0; }
 
-/* Speed toggle */
 .speed-toggle { display: inline-flex; border: 1px solid #0f3460; border-radius: 6px; overflow: hidden; }
 .speed-btn { padding: 6px 14px; background: #16213e; color: #a0a0a0; border: none; border-right: 1px solid #0f3460;
   cursor: pointer; font-size: 0.8rem; }
 .speed-btn:last-child { border-right: none; }
 .speed-btn.active { background: #0f3460; color: #e94560; }
 
-/* Layout */
 .split-view { display: flex; gap: 24px; flex-wrap: wrap; }
 .split-left { flex: 1; min-width: 300px; max-height: 600px; overflow-y: auto; }
 .split-right { flex: 0 0 auto; }
 
 .subtitle { text-align: center; color: #888; margin-bottom: 16px; font-size: 0.9rem; }
+
+.progress-bar { width: 100%; height: 4px; background: #16213e; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.progress-fill { height: 100%; background: #e94560; transition: width 0.1s; }
 </style>
 </head>
 <body>
@@ -134,7 +128,7 @@ button:disabled { background: #555; cursor: not-allowed; }
         <button class="street-btn" data-street="turn" onclick="setStreet(this)">Turn</button>
         <button class="street-btn" data-street="river" onclick="setStreet(this)">River</button>
       </div>
-      <input type="text" id="board-input" placeholder="e.g. Tc 7s Ac 7d">
+      <input type="text" id="board-input" placeholder="e.g. Tc7sAc7d or Tc 7s Ac 7d">
       <button onclick="lookupRanking()">Look Up</button>
       <button class="btn-secondary btn-small" onclick="randomBoard()">Random</button>
     </div>
@@ -155,13 +149,14 @@ button:disabled { background: #555; cursor: not-allowed; }
   <div id="vsrange" class="panel">
     <div class="input-row">
       <label>Hero:</label>
-      <input type="text" id="hero-input" placeholder="e.g. Ah Kd" style="width:120px">
+      <input type="text" id="hero-input" placeholder="e.g. AhKd" style="width:120px">
       <label>Board:</label>
-      <input type="text" id="vr-board-input" placeholder="e.g. Qh Jc 3s 7d">
-      <button onclick="runVsRange()">Simulate</button>
+      <input type="text" id="vr-board-input" placeholder="optional, e.g. Qh Jc 3s 7d">
+      <button id="sim-btn" onclick="runVsRange()">Simulate</button>
       <div class="speed-toggle">
-        <button class="speed-btn active" data-speed="fast" onclick="setSpeed(this)">Fast</button>
-        <button class="speed-btn" data-speed="slow" onclick="setSpeed(this)">Thorough</button>
+        <button class="speed-btn" data-speed="fast" onclick="setSpeed(this)">Fast (200)</button>
+        <button class="speed-btn active" data-speed="medium" onclick="setSpeed(this)">Medium (1000)</button>
+        <button class="speed-btn" data-speed="slow" onclick="setSpeed(this)">Thorough (5000)</button>
       </div>
     </div>
 
@@ -175,6 +170,7 @@ button:disabled { background: #555; cursor: not-allowed; }
     </div>
 
     <div id="vr-status" class="status"></div>
+    <div id="vr-progress" class="progress-bar" style="display:none"><div class="progress-fill" id="vr-progress-fill"></div></div>
 
     <div class="split-view">
       <div class="split-left">
@@ -190,9 +186,9 @@ button:disabled { background: #555; cursor: not-allowed; }
 <script>
 // ── State ─────────────────────────────────────────────────────────────────
 
-let currentVariant = 'sd';  // 'sd' or 'std'
+let currentVariant = 'sd';
 let currentStreet = 'preflop';
-let simSpeed = 'fast';
+let simSpeed = 'medium';
 
 const SD_RANKS = 'AKQJT9876';
 const STD_RANKS = 'AKQJT98765432';
@@ -226,17 +222,13 @@ const TREYS_SUITS_SORTED = [1, 2, 4, 8];
 function parseCards(text) {
   text = text.trim().toUpperCase();
   if (!text) return [];
-  // Support both "Tc 7s Ac 7d" and "Tc7sAc7d" formats
-  // Split by spaces first, then split remaining chunks into 2-char pairs
   let tokens = [];
   const parts = text.replace(/[,]+/g, ' ').split(/\s+/).filter(Boolean);
   for (const part of parts) {
     if (part.length === 2) {
       tokens.push(part);
     } else if (part.length % 2 === 0) {
-      for (let i = 0; i < part.length; i += 2) {
-        tokens.push(part.substring(i, i + 2));
-      }
+      for (let i = 0; i < part.length; i += 2) tokens.push(part.substring(i, i + 2));
     } else {
       throw new Error(`Cannot parse: ${part}`);
     }
@@ -278,7 +270,30 @@ function handCssClass(label) {
   return label.endsWith('s') ? 'suited' : 'offsuit';
 }
 
-// ── Variant / Street switching ────────────────────────────────────────────
+// ── Build deck ────────────────────────────────────────────────────────────
+
+function buildDeck() {
+  const ranks = RANK_CHARS();
+  const deck = [];
+  for (const r of ranks) {
+    for (const s of SUIT_CHARS) {
+      deck.push({ rank: RANK_CHAR_TO_INT[r], suit: SUIT_CHAR_TO_INT[s], str: r + s });
+    }
+  }
+  return deck;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function cardId(c) { return c.rank * 16 + c.suit; }
+
+// ── UI switching ──────────────────────────────────────────────────────────
 
 function setVariant(v) {
   currentVariant = v;
@@ -291,8 +306,8 @@ function setStreet(btn) {
   currentStreet = btn.dataset.street;
   document.querySelectorAll('.street-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  // Don't auto-lookup, let user click Look Up or just trigger it
   updateCardDisplay();
+  lookupRanking();
 }
 
 function setSpeed(btn) {
@@ -305,7 +320,6 @@ function syncSliders() {
   const min = document.getElementById('range-min');
   const max = document.getElementById('range-max');
   if (parseInt(min.value) > parseInt(max.value)) {
-    // swap them
     if (document.activeElement === min) max.value = min.value;
     else min.value = max.value;
   }
@@ -313,8 +327,7 @@ function syncSliders() {
   document.getElementById('range-max-label').textContent = max.value + '%';
 }
 
-// ── Tab switching ─────────────────────────────────────────────────────────
-
+// Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -324,42 +337,24 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// ── Card display (show which cards are used/unused) ───────────────────────
+// Enter key on inputs
+document.getElementById('board-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') lookupRanking();
+});
+document.getElementById('hero-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runVsRange();
+});
+document.getElementById('vr-board-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runVsRange();
+});
 
-function updateCardDisplay() {
-  const boardText = document.getElementById('board-input').value.trim();
-  const displayEl = document.getElementById('card-display');
-  if (!boardText) { displayEl.innerHTML = ''; return; }
-
-  try {
-    const cards = parseCards(boardText);
-    const needed = {preflop: 0, flop: 3, turn: 4, river: 5}[currentStreet];
-    if (needed === 0) { displayEl.innerHTML = ''; return; }
-
-    let html = 'Board: ';
-    cards.forEach((c, i) => {
-      const cls = i < needed ? 'used' : 'unused';
-      html += `<span class="${cls}">${cardStr(c)}</span> `;
-    });
-    if (cards.length < needed) {
-      html += `<span class="error">(need ${needed - cards.length} more)</span>`;
-    }
-    displayEl.innerHTML = html;
-  } catch(e) {
-    displayEl.innerHTML = `<span class="error">${e.message}</span>`;
-  }
-}
-
+// Auto-detect street from board input
 document.getElementById('board-input').addEventListener('input', () => {
-  // Auto-detect street from card count
   const text = document.getElementById('board-input').value.trim();
   if (text) {
     try {
       const n = parseCards(text).length;
-      let street = 'preflop';
-      if (n >= 5) street = 'river';
-      else if (n === 4) street = 'turn';
-      else if (n === 3) street = 'flop';
+      let street = n >= 5 ? 'river' : n === 4 ? 'turn' : n === 3 ? 'flop' : 'preflop';
       currentStreet = street;
       document.querySelectorAll('.street-btn').forEach(b =>
         b.classList.toggle('active', b.dataset.street === street));
@@ -368,29 +363,37 @@ document.getElementById('board-input').addEventListener('input', () => {
   updateCardDisplay();
 });
 
+// ── Card display ──────────────────────────────────────────────────────────
+
+function updateCardDisplay() {
+  const boardText = document.getElementById('board-input').value.trim();
+  const displayEl = document.getElementById('card-display');
+  if (!boardText || currentStreet === 'preflop') { displayEl.innerHTML = ''; return; }
+  try {
+    const cards = parseCards(boardText);
+    const needed = {flop: 3, turn: 4, river: 5}[currentStreet] || 0;
+    let html = 'Board: ';
+    cards.forEach((c, i) => {
+      html += `<span class="${i < needed ? 'used' : 'unused'}">${cardStr(c)}</span> `;
+    });
+    if (cards.length < needed) html += `<span class="error">(need ${needed - cards.length} more)</span>`;
+    displayEl.innerHTML = html;
+  } catch(e) {
+    displayEl.innerHTML = `<span class="error">${e.message}</span>`;
+  }
+}
+
 // ── Random board ──────────────────────────────────────────────────────────
 
 function randomBoard() {
-  const ranks = RANK_CHARS();
-  const suits = SUIT_CHARS;
-  const needed = {preflop: 0, flop: 3, turn: 4, river: 5}[currentStreet];
-  if (needed === 0) {
-    // If on preflop, switch to flop first
+  if (currentStreet === 'preflop') {
     currentStreet = 'flop';
     document.querySelectorAll('.street-btn').forEach(b =>
       b.classList.toggle('active', b.dataset.street === 'flop'));
   }
-  const n = {preflop: 3, flop: 3, turn: 4, river: 5}[currentStreet];
-
-  // Generate n random unique cards
-  const deck = [];
-  for (const r of ranks) for (const s of suits) deck.push(r + s);
-  // Shuffle and pick n
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
-  }
-  document.getElementById('board-input').value = deck.slice(0, n).join(' ');
+  const n = {flop: 3, turn: 4, river: 5}[currentStreet];
+  const deck = shuffle(buildDeck());
+  document.getElementById('board-input').value = deck.slice(0, n).map(c => cardStr(c)).join(' ');
   updateCardDisplay();
   lookupRanking();
 }
@@ -414,6 +417,7 @@ async function lookupRanking() {
 
   try {
     let ranking;
+    let isRiver = false;
 
     if (street === 'preflop') {
       displayEl.innerHTML = '';
@@ -433,36 +437,31 @@ async function lookupRanking() {
         statusEl.innerHTML = `<span class="error">${isSD ? 'Short deck: cards 6-A only' : 'Invalid card'}</span>`;
         return;
       }
-
       const needed = {flop: 3, turn: 4, river: 5}[street];
       if (allCards.length < needed) {
         statusEl.innerHTML = `<span class="error">${street} needs at least ${needed} cards (got ${allCards.length})</span>`;
         return;
       }
-      // Use only the needed number of cards
       const cards = allCards.slice(0, needed);
 
-      // Show which cards are used
-      let displayHtml = 'Board: ';
+      // Show card display
+      let dhtml = 'Board: ';
       allCards.forEach((c, i) => {
-        displayHtml += `<span class="${i < needed ? 'used' : 'unused'}">${cardStr(c)}</span> `;
+        dhtml += `<span class="${i < needed ? 'used' : 'unused'}">${cardStr(c)}</span> `;
       });
-      displayEl.innerHTML = displayHtml;
+      displayEl.innerHTML = dhtml;
 
       if (street === 'flop') {
-        if (!isSD) {
-          statusEl.innerHTML = '<span class="error">Standard deck flop data not yet available. Use Short Deck or try Turn/River.</span>';
-          return;
-        }
-        statusEl.innerHTML = '<span class="error">Short deck flop lookup coming soon (re-running computation to save per-board data).</span>';
+        if (!isSD) { statusEl.innerHTML = '<span class="error">Standard deck flop data not yet available</span>'; return; }
+        statusEl.innerHTML = '<span class="error">Short deck flop lookup coming soon (data being re-computed)</span>';
         return;
       }
-
       if (!isSD) {
         statusEl.innerHTML = `<span class="error">Standard deck ${street} data not yet available. Run the simulation first.</span>`;
         return;
       }
 
+      isRiver = (street === 'river');
       const dataKey = street === 'turn' ? 'sdTurns' : 'sdRivers';
       const dataUrl = street === 'turn' ? 'data/sd_turns.json' : 'data/sd_rivers.json';
       const sizeHint = street === 'turn' ? '1.3 MB' : '3.5 MB';
@@ -471,28 +470,24 @@ async function lookupRanking() {
 
       const { key } = canonicalizeBoard(cards);
       const boardData = data[key];
-      if (!boardData) {
-        statusEl.innerHTML = '<span class="error">Board not found in data. Check your cards.</span>';
-        return;
-      }
+      if (!boardData) { statusEl.innerHTML = '<span class="error">Board not found. Check your cards.</span>'; return; }
 
       ranking = boardData.map((row, i) => ({
         hand: row[0], value: row[1], rank: i + 1, combos: row[2]
       }));
       const boardStr = cards.map(c => cardStr(c)).join(' ');
-      const metric = street === 'river' ? 'hand strength' : 'Action Equity';
-      statusEl.textContent = `${street.charAt(0).toUpperCase() + street.slice(1)} ranking for ${boardStr} (${metric})`;
+      statusEl.textContent = `${street.charAt(0).toUpperCase() + street.slice(1)} ranking for ${boardStr}`;
     }
 
-    renderRanking(ranking, resultEl);
-    renderGrid(ranking, gridEl, ranks, 100);
+    renderRanking(ranking, resultEl, isRiver);
+    renderGrid(ranking, gridEl, ranks, 100, 0, isRiver);
 
   } catch (e) {
     statusEl.innerHTML = `<span class="error">${e.message}</span>`;
   }
 }
 
-// ── VS Range simulation ──────────────────────────────────────────────────
+// ── VS Range — Monte Carlo simulation using pre-computed river data ──────
 
 async function runVsRange() {
   const heroText = document.getElementById('hero-input').value.trim();
@@ -500,169 +495,198 @@ async function runVsRange() {
   const statusEl = document.getElementById('vr-status');
   const resultEl = document.getElementById('vr-result');
   const gridEl = document.getElementById('vr-grid');
+  const progressBar = document.getElementById('vr-progress');
+  const progressFill = document.getElementById('vr-progress-fill');
 
   resultEl.innerHTML = '';
   gridEl.innerHTML = '';
+  progressBar.style.display = 'none';
 
   const isSD = currentVariant === 'sd';
   const ranks = RANK_CHARS();
   const minRank = isSD ? 4 : 0;
 
+  if (!isSD) { statusEl.innerHTML = '<span class="error">Standard deck simulation not yet available (need river data)</span>'; return; }
   if (!heroText) { statusEl.innerHTML = '<span class="error">Enter hero hand (2 cards)</span>'; return; }
 
   try {
     const heroCards = parseCards(heroText);
     if (heroCards.length !== 2) { statusEl.innerHTML = '<span class="error">Hero needs exactly 2 cards</span>'; return; }
-    if (heroCards.some(c => c.rank < minRank)) { statusEl.innerHTML = '<span class="error">Invalid card for this variant</span>'; return; }
+    if (heroCards.some(c => c.rank < minRank)) { statusEl.innerHTML = '<span class="error">Invalid card for short deck</span>'; return; }
 
     const heroLabel = getHandLabel(heroCards[0], heroCards[1]);
-    let ranking, street;
+    const heroCardIds = new Set(heroCards.map(cardId));
 
-    if (!boardText) {
-      street = 'preflop';
-      const key = isSD ? 'sdPreflop' : 'stdPreflop';
-      const url = isSD ? 'data/sd_preflop.json' : 'data/std_preflop.json';
-      statusEl.textContent = 'Loading preflop data...';
-      const data = await ensureData(key, url);
-      ranking = data.map((row, i) => ({
-        hand: row[0], value: row[1], rank: i + 1, combos: null
-      }));
-    } else {
-      const boardCards = parseCards(boardText);
-      if (boardCards.some(c => c.rank < minRank)) { statusEl.innerHTML = '<span class="error">Invalid card for this variant</span>'; return; }
-
-      if (!isSD) { statusEl.innerHTML = '<span class="error">Standard deck board data not yet available</span>'; return; }
-
-      if (boardCards.length === 3) {
-        statusEl.innerHTML = '<span class="error">Flop data coming soon</span>'; return;
-      } else if (boardCards.length === 4) {
-        street = 'turn';
-        statusEl.textContent = 'Loading turn data...';
-        const data = await ensureData('sdTurns', 'data/sd_turns.json');
-        const { key } = canonicalizeBoard(boardCards);
-        const boardData = data[key];
-        if (!boardData) { statusEl.innerHTML = '<span class="error">Board not found</span>'; return; }
-        ranking = boardData.map((row, i) => ({ hand: row[0], value: row[1], rank: i + 1, combos: row[2] }));
-      } else if (boardCards.length >= 5) {
-        street = 'river';
-        statusEl.textContent = 'Loading river data...';
-        const data = await ensureData('sdRivers', 'data/sd_rivers.json');
-        const { key } = canonicalizeBoard(boardCards.slice(0, 5));
-        const boardData = data[key];
-        if (!boardData) { statusEl.innerHTML = '<span class="error">Board not found</span>'; return; }
-        ranking = boardData.map((row, i) => ({ hand: row[0], value: row[1], rank: i + 1, combos: row[2] }));
-      } else {
-        statusEl.innerHTML = '<span class="error">Board must be 3-5 cards</span>'; return;
+    // Parse optional board
+    let fixedBoard = [];
+    if (boardText) {
+      fixedBoard = parseCards(boardText);
+      if (fixedBoard.some(c => c.rank < minRank)) { statusEl.innerHTML = '<span class="error">Invalid board card</span>'; return; }
+      if (fixedBoard.length > 5) fixedBoard = fixedBoard.slice(0, 5);
+      // Check no overlap with hero
+      for (const bc of fixedBoard) {
+        if (heroCardIds.has(cardId(bc))) {
+          statusEl.innerHTML = '<span class="error">Board card overlaps with hero hand</span>';
+          return;
+        }
       }
     }
+    const cardsToComplete = 5 - fixedBoard.length;
 
+    // Get opponent range from preflop ranking
+    const preflopData = await ensureData('sdPreflop', 'data/sd_preflop.json');
     const rangeMin = parseInt(document.getElementById('range-min').value);
     const rangeMax = parseInt(document.getElementById('range-max').value);
-    const total = ranking.length;
+    const totalHands = preflopData.length;
+    const minIdx = Math.floor(rangeMin / 100 * totalHands);
+    const maxIdx = Math.ceil(rangeMax / 100 * totalHands);
+    const oppLabels = new Set(preflopData.slice(minIdx, maxIdx).map(r => r[0]).filter(l => l !== heroLabel));
 
-    // Find hero in ranking
-    const heroEntry = ranking.find(r => r.hand === heroLabel);
-    if (!heroEntry) {
-      statusEl.innerHTML = `<span class="error">${heroLabel} not found in ranking</span>`;
-      return;
-    }
-    const heroPct = heroEntry.rank / total;  // hero's percentile (0-1)
-    const heroVal = 1.0 / heroPct;           // hero's potential value
-
-    // Filter opponents to selected range
-    const minIdx = Math.floor(rangeMin / 100 * total);
-    const maxIdx = Math.ceil(rangeMax / 100 * total);
-    const oppRange = ranking.slice(minIdx, maxIdx).filter(r => r.hand !== heroLabel);
-
-    if (oppRange.length === 0) {
-      statusEl.innerHTML = '<span class="error">No opponents in selected range (excluding hero)</span>';
+    if (oppLabels.size === 0) {
+      statusEl.innerHTML = '<span class="error">No opponents in range (excluding hero)</span>';
       return;
     }
 
-    // ── Simulate AE against the range ──
-    // For each opponent in range, compute AE outcome using their percentile
-    statusEl.textContent = 'Computing Action Equity vs range...';
-    await new Promise(r => setTimeout(r, 10)); // let UI update
+    // Load river data for lookups
+    statusEl.textContent = 'Loading river data (3.5 MB)...';
+    const riverData = await ensureData('sdRivers', 'data/sd_rivers.json');
 
-    const iterations = simSpeed === 'fast' ? 1 : 3;  // weight by combos
+    // Run Monte Carlo
+    const numBoards = {fast: 200, medium: 1000, slow: 5000}[simSpeed];
+    statusEl.textContent = `Simulating ${numBoards} boards...`;
+    progressBar.style.display = 'block';
+    progressFill.style.width = '0%';
+    document.getElementById('sim-btn').disabled = true;
+
+    await new Promise(r => setTimeout(r, 20)); // let UI update
+
+    // Build remaining deck (exclude hero and fixed board)
+    const excludeIds = new Set([...heroCardIds, ...fixedBoard.map(cardId)]);
+    const remainingDeck = buildDeck().filter(c => !excludeIds.has(cardId(c)));
+
     let totalWeightedEV = 0;
     let totalWeight = 0;
     let wins = 0, losses = 0, ties = 0;
+    let boardsUsed = 0;
 
-    for (const opp of oppRange) {
-      const oppPct = opp.rank / total;
-      const oppVal = 1.0 / oppPct;
-      const stake = Math.min(heroVal, oppVal);
-      const combos = opp.combos || 1;
-      const weight = combos * iterations;
+    const BATCH = 50;
+    for (let batch = 0; batch < numBoards; batch += BATCH) {
+      const batchEnd = Math.min(batch + BATCH, numBoards);
 
-      totalWeight += stake * weight;
+      for (let b = batch; b < batchEnd; b++) {
+        // Deal remaining community cards
+        const deck = shuffle([...remainingDeck]);
+        const dealtBoard = [...fixedBoard, ...deck.slice(0, cardsToComplete)];
 
-      if (heroPct < oppPct) {
-        // Hero wins
-        totalWeightedEV += stake * weight;
-        wins += weight;
-      } else if (heroPct > oppPct) {
-        // Hero loses
-        totalWeightedEV -= stake * weight;
-        losses += weight;
-      } else {
-        ties += weight;
+        // Canonicalize and look up river ranking
+        const { key } = canonicalizeBoard(dealtBoard);
+        const boardRanking = riverData[key];
+        if (!boardRanking) continue; // shouldn't happen for valid short deck
+
+        // Build label -> percentile lookup for this board
+        const labelPct = {};
+        const total = boardRanking.length;
+        for (let i = 0; i < total; i++) {
+          const [label, val, combos] = boardRanking[i];
+          labelPct[label] = (i + 1) / total;  // river: sorted by percentile ascending, so rank = i+1
+        }
+
+        const heroPct = labelPct[heroLabel];
+        if (heroPct === undefined) continue;
+        const heroVal = 1.0 / heroPct;
+
+        // Compare hero vs each opponent label in range
+        for (const oppLabel of oppLabels) {
+          const oppPct = labelPct[oppLabel];
+          if (oppPct === undefined) continue;
+          const oppVal = 1.0 / oppPct;
+          const stake = Math.min(heroVal, oppVal);
+
+          totalWeight += stake;
+
+          if (heroPct < oppPct) {
+            totalWeightedEV += stake;
+            wins++;
+          } else if (heroPct > oppPct) {
+            totalWeightedEV -= stake;
+            losses++;
+          } else {
+            ties++;
+          }
+        }
+        boardsUsed++;
       }
+
+      // Update progress
+      const pct = Math.min(100, (batchEnd / numBoards) * 100);
+      progressFill.style.width = pct + '%';
+      await new Promise(r => setTimeout(r, 0)); // yield to UI
     }
 
-    const ae = totalWeight > 0 ? totalWeightedEV / totalWeight : 0;
-    const totalHands = wins + losses + ties;
-    const winRate = totalHands > 0 ? ((wins + ties * 0.5) / totalHands * 100) : 0;
+    document.getElementById('sim-btn').disabled = false;
+    progressBar.style.display = 'none';
 
-    // Build result
+    const ae = totalWeight > 0 ? totalWeightedEV / totalWeight : 0;
+    const totalMatchups = wins + losses + ties;
+    const winRate = totalMatchups > 0 ? ((wins + ties * 0.5) / totalMatchups * 100) : 0;
+
+    // Show results
     let html = '<div class="vs-range-results">';
     html += `<div class="hero-info">Hero: <strong class="${handCssClass(heroLabel)}">${heroLabel}</strong>`;
-    html += ` &mdash; Rank ${heroEntry.rank}/${total} (top ${(heroPct * 100).toFixed(1)}%)`;
+    if (fixedBoard.length > 0) {
+      html += ` on ${fixedBoard.map(c => cardStr(c)).join(' ')}`;
+    }
     html += '</div>';
 
-    html += `<div style="margin:8px 0">Opponent range: top ${rangeMin}%-${rangeMax}% (${oppRange.length} hands)</div>`;
+    html += `<div style="margin:8px 0">Opponent range: top ${rangeMin}%-${rangeMax}% (${oppLabels.size} hand types) &bull; ${boardsUsed} boards simulated</div>`;
 
-    html += '<div style="margin-top:12px">';
     const aeCls = ae > 0 ? 'good' : ae < 0 ? 'bad' : 'neutral';
+    html += `<div style="margin-top:12px">`;
     html += `<span class="metric ${aeCls}" style="font-size:1.1rem">Action Equity vs range: ${ae > 0 ? '+' : ''}${ae.toFixed(4)}</span>`;
-    html += '</div>';
+    html += `</div>`;
 
     html += '<div style="margin-top:8px">';
-    html += `<span class="metric good">Beats: ${wins}</span> `;
-    html += `<span class="metric bad">Loses to: ${losses}</span> `;
-    if (ties > 0) html += `<span class="metric neutral">Ties: ${ties}</span> `;
+    html += `<span class="metric good">Wins: ${wins.toLocaleString()}</span> `;
+    html += `<span class="metric bad">Losses: ${losses.toLocaleString()}</span> `;
+    if (ties > 0) html += `<span class="metric neutral">Ties: ${ties.toLocaleString()}</span> `;
     html += `<span class="metric ${winRate >= 50 ? 'good' : 'bad'}">Win rate: ${winRate.toFixed(1)}%</span>`;
     html += '</div>';
-
-    // Compare to overall AE
-    html += `<div style="margin-top:8px; color:#888; font-size:0.85rem">`;
-    html += `Overall AE (vs all hands): ${heroEntry.value > 0 ? '+' : ''}${heroEntry.value.toFixed(4)}`;
-    html += `</div>`;
 
     html += '</div>';
     resultEl.innerHTML = html;
 
-    // Render grid with range highlighted
-    renderGrid(ranking, gridEl, ranks, rangeMax, rangeMin);
-    statusEl.textContent = `${street} &mdash; ${heroLabel} vs ${rangeMin}%-${rangeMax}% range`;
+    // Render grid showing which hands are in the opponent range
+    const preflopRanking = preflopData.map((row, i) => ({
+      hand: row[0], value: row[1], rank: i + 1, combos: null
+    }));
+    renderGrid(preflopRanking, gridEl, ranks, rangeMax, rangeMin, false);
+
+    statusEl.textContent = `Simulation complete: ${heroLabel} vs ${rangeMin}%-${rangeMax}% range (${boardsUsed} boards)`;
 
   } catch (e) {
+    document.getElementById('sim-btn').disabled = false;
+    progressBar.style.display = 'none';
     statusEl.innerHTML = `<span class="error">${e.message}</span>`;
   }
 }
 
 // ── Rendering ─────────────────────────────────────────────────────────────
 
-function renderRanking(ranking, container) {
+function renderRanking(ranking, container, isRiver = false) {
+  const valueLabel = isRiver ? 'Percentile' : 'Action Equity';
   let html = '<table class="ranking-table"><thead><tr>';
-  html += '<th class="rank-col">#</th><th class="hand-col">Hand</th><th>Value</th>';
+  html += `<th class="rank-col">#</th><th class="hand-col">Hand</th><th>${valueLabel}</th>`;
   if (ranking[0] && ranking[0].combos !== null) html += '<th>Combos</th>';
   html += '</tr></thead><tbody>';
 
   for (const r of ranking) {
     const cls = handCssClass(r.hand);
-    const valStr = r.value > 0 ? `+${r.value.toFixed(4)}` : r.value.toFixed(4);
+    let valStr;
+    if (isRiver) {
+      valStr = (r.value * 100).toFixed(1) + '%';
+    } else {
+      valStr = (r.value > 0 ? '+' : '') + r.value.toFixed(4);
+    }
     html += `<tr><td class="rank-col">${r.rank}</td>`;
     html += `<td class="hand-col ${cls}">${r.hand}</td>`;
     html += `<td>${valStr}</td>`;
@@ -670,10 +694,15 @@ function renderRanking(ranking, container) {
     html += '</tr>';
   }
   html += '</tbody></table>';
+
+  if (ranking[0] && ranking[0].combos !== null) {
+    html += '<p class="note">Values averaged across suit combinations for each hand type.</p>';
+  }
+
   container.innerHTML = html;
 }
 
-function renderGrid(ranking, container, ranks, rangePctMax, rangePctMin = 0) {
+function renderGrid(ranking, container, ranks, rangePctMax, rangePctMin = 0, useEVColor = true) {
   const n = ranks.length;
   const gridClass = n <= 9 ? 'grid-9' : 'grid-13';
 
@@ -681,10 +710,11 @@ function renderGrid(ranking, container, ranks, rangePctMax, rangePctMin = 0) {
   const total = ranking.length;
   for (const r of ranking) lookup[r.hand] = r;
 
-  // Find max absolute value for color scaling
   let maxAbs = 0;
-  for (const r of ranking) maxAbs = Math.max(maxAbs, Math.abs(r.value));
-  if (maxAbs === 0) maxAbs = 1;
+  if (useEVColor) {
+    for (const r of ranking) maxAbs = Math.max(maxAbs, Math.abs(r.value));
+    if (maxAbs === 0) maxAbs = 1;
+  }
 
   let html = `<h3>Hand Grid</h3>`;
   html += `<div class="hand-grid ${gridClass}">`;
@@ -701,37 +731,34 @@ function renderGrid(ranking, container, ranks, rangePctMax, rangePctMin = 0) {
       const pct = entry ? (entry.rank / total * 100) : 100;
       const inRange = pct >= rangePctMin && pct <= rangePctMax;
 
-      // Color: green for positive EV, red for negative, centered on 0
       let bg;
-      if (entry) {
+      if (entry && useEVColor) {
         const val = entry.value;
         const intensity = Math.min(Math.abs(val) / maxAbs, 1);
         if (val > 0) {
-          // Green shades
           const g = Math.round(40 + intensity * 80);
-          const r_c = Math.round(20 - intensity * 10);
-          bg = `rgb(${r_c}, ${g}, ${r_c + 10})`;
+          bg = `rgb(${Math.round(20 - intensity * 10)}, ${g}, ${Math.round(20 - intensity * 5)})`;
         } else if (val < 0) {
-          // Red shades
           const r_c = Math.round(40 + intensity * 80);
-          const g = Math.round(20 - intensity * 10);
-          bg = `rgb(${r_c}, ${g}, ${g + 10})`;
+          bg = `rgb(${r_c}, ${Math.round(20 - intensity * 10)}, ${Math.round(20 - intensity * 5)})`;
         } else {
           bg = 'rgb(35, 35, 45)';
         }
+      } else if (entry) {
+        // Rank-based coloring (for range grid)
+        const strength = 1 - entry.rank / total;
+        const hue = strength * 120;
+        bg = `hsl(${hue}, 60%, 30%)`;
       } else {
         bg = 'rgb(20, 20, 30)';
       }
 
-      const opacity = inRange ? 1.0 : 0.25;
       const title = entry
-        ? `${label}: rank ${entry.rank}/${total} (${pct.toFixed(1)}%) | value: ${entry.value > 0 ? '+' : ''}${entry.value.toFixed(4)}`
-        : `${label}: not available`;
+        ? `${label}: #${entry.rank}/${total} (${pct.toFixed(1)}%) | ${entry.value > 0 ? '+' : ''}${entry.value.toFixed(4)}`
+        : `${label}: n/a`;
 
       html += `<div class="grid-cell ${inRange ? 'in-range' : 'out-range'}" `
-            + `style="background:${bg}; opacity:${opacity}" `
-            + `title="${title}">`
-            + `${label}</div>`;
+            + `style="background:${bg}" title="${title}">${label}</div>`;
     }
   }
   html += '</div>';
