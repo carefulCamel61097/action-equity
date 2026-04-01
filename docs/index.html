@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action Equity - Poker Hand Rankings</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
+h1 { text-align: center; padding: 20px; color: #e94560; font-size: 1.8rem; }
+h2 { color: #e94560; margin-bottom: 10px; font-size: 1.2rem; }
+h3 { color: #c0c0c0; margin-bottom: 8px; font-size: 1rem; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 16px 40px; }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab { padding: 10px 20px; background: #16213e; border: 1px solid #0f3460; border-radius: 8px 8px 0 0;
+       cursor: pointer; color: #a0a0a0; transition: all 0.2s; }
+.tab.active { background: #0f3460; color: #e94560; border-bottom-color: #0f3460; }
+.tab:hover { color: #e94560; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Board input */
+.input-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.input-row label { color: #a0a0a0; font-size: 0.9rem; }
+.input-row input, .input-row select { padding: 8px 12px; background: #16213e; border: 1px solid #0f3460;
+  color: #e0e0e0; border-radius: 6px; font-size: 0.95rem; }
+.input-row input { width: 200px; }
+.input-row input::placeholder { color: #555; }
+button { padding: 8px 20px; background: #e94560; color: white; border: none; border-radius: 6px;
+  cursor: pointer; font-size: 0.95rem; transition: background 0.2s; }
+button:hover { background: #c73a52; }
+button:disabled { background: #555; cursor: not-allowed; }
+.status { color: #a0a0a0; font-size: 0.85rem; margin-top: 8px; }
+.error { color: #e94560; }
+
+/* Ranking table */
+.ranking-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.9rem; }
+.ranking-table th { text-align: left; padding: 8px 12px; background: #16213e; color: #a0a0a0;
+  border-bottom: 2px solid #0f3460; position: sticky; top: 0; }
+.ranking-table td { padding: 6px 12px; border-bottom: 1px solid #1a1a3e; }
+.ranking-table tr:hover { background: #16213e; }
+.ranking-table .rank-col { width: 50px; color: #888; }
+.ranking-table .hand-col { font-weight: 600; }
+.ranking-table .suited { color: #e94560; }
+.ranking-table .offsuit { color: #4ec5d4; }
+.ranking-table .pair { color: #ffc107; }
+
+/* 9x9 / 13x13 grid */
+.grid-container { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; }
+.grid-section { flex: 1; min-width: 320px; }
+.hand-grid { display: grid; gap: 2px; width: fit-content; }
+.grid-9 { grid-template-columns: repeat(9, 38px); }
+.grid-13 { grid-template-columns: repeat(13, 34px); }
+.grid-cell { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 600; border-radius: 4px; cursor: default; transition: all 0.15s; }
+.grid-cell.in-range { opacity: 1; }
+.grid-cell.out-range { opacity: 0.25; }
+.grid-cell:hover { transform: scale(1.15); z-index: 1; }
+
+/* Percentile slider */
+.slider-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+.slider-row input[type="range"] { flex: 1; min-width: 150px; accent-color: #e94560; }
+.slider-label { font-size: 0.9rem; color: #a0a0a0; min-width: 60px; }
+
+/* VS Range section */
+.vs-range-results { margin-top: 16px; padding: 16px; background: #16213e; border-radius: 8px; }
+.vs-range-results .hero-info { font-size: 1.1rem; margin-bottom: 12px; }
+.metric { display: inline-block; padding: 4px 10px; border-radius: 4px; margin: 2px; font-size: 0.85rem; }
+.metric.good { background: #1a4a2a; color: #4caf50; }
+.metric.bad { background: #4a1a1a; color: #ef5350; }
+.metric.neutral { background: #2a2a4a; color: #a0a0a0; }
+
+/* Loading overlay */
+.loading { text-align: center; padding: 40px; color: #888; }
+.loading .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid #333;
+  border-top-color: #e94560; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Layout for ranking + grid side by side */
+.split-view { display: flex; gap: 24px; flex-wrap: wrap; }
+.split-left { flex: 1; min-width: 300px; max-height: 600px; overflow-y: auto; }
+.split-right { flex: 0 0 auto; }
+
+/* Subtitle */
+.subtitle { text-align: center; color: #888; margin-top: -12px; margin-bottom: 16px; font-size: 0.9rem; }
+.subtitle a { color: #4ec5d4; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<h1>Action Equity - Poker Hand Rankings</h1>
+<p class="subtitle">Short Deck (6+) Hold'em &bull; Exhaustive computation over all boards</p>
+
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" data-tab="ranking">Board Rankings</div>
+    <div class="tab" data-tab="vsrange">VS Range</div>
+  </div>
+
+  <!-- ===== RANKING TAB ===== -->
+  <div id="ranking" class="panel active">
+    <div class="input-row">
+      <label>Board:</label>
+      <input type="text" id="board-input" placeholder="e.g. Ah Kd 9c 7s or empty">
+      <select id="street-select">
+        <option value="preflop">Preflop (no board)</option>
+        <option value="turn">Turn (4 cards)</option>
+        <option value="river">River (5 cards)</option>
+      </select>
+      <button id="lookup-btn" onclick="lookupRanking()">Look Up</button>
+    </div>
+    <div id="ranking-status" class="status"></div>
+
+    <div class="split-view">
+      <div class="split-left">
+        <div id="ranking-result"></div>
+      </div>
+      <div class="split-right">
+        <div id="ranking-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VS RANGE TAB ===== -->
+  <div id="vsrange" class="panel">
+    <div class="input-row">
+      <label>Hero hand:</label>
+      <input type="text" id="hero-input" placeholder="e.g. Ah Kd">
+      <label>Board:</label>
+      <input type="text" id="vr-board-input" placeholder="e.g. Qh Jc 3s 7d or empty">
+      <button onclick="lookupVsRange()">Look Up</button>
+    </div>
+
+    <div class="slider-row">
+      <span class="slider-label">Opponent range:</span>
+      <span id="range-min-label">0%</span>
+      <input type="range" id="range-min" min="0" max="100" value="0" step="1">
+      <span>to</span>
+      <input type="range" id="range-max" min="0" max="100" value="100" step="1">
+      <span id="range-max-label">100%</span>
+    </div>
+
+    <div id="vr-status" class="status"></div>
+
+    <div class="split-view">
+      <div class="split-left">
+        <div id="vr-result"></div>
+      </div>
+      <div class="split-right">
+        <div id="vr-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data loading ──────────────────────────────────────────────────────────
+
+const DATA = {
+  sdPreflop: null,
+  stdPreflop: null,
+  sdTurns: null,
+  sdRivers: null,
+};
+
+const SD_RANKS = 'AKQJT9876';
+const STD_RANKS = 'AKQJT98765432';
+
+async function loadJSON(url) {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Failed to load ${url}`);
+  return resp.json();
+}
+
+async function ensureData(key, url) {
+  if (DATA[key]) return DATA[key];
+  DATA[key] = await loadJSON(url);
+  return DATA[key];
+}
+
+// ── Card parsing ──────────────────────────────────────────────────────────
+
+const RANK_CHAR_TO_INT = {'A':12,'K':11,'Q':10,'J':9,'T':8,'9':7,'8':6,'7':5,'6':4,'5':3,'4':2,'3':1,'2':0};
+const SUIT_CHAR_TO_INT = {'s':1,'h':2,'d':4,'c':8};  // treys encoding
+const TREYS_SUITS_SORTED = [1, 2, 4, 8];
+
+function parseCards(text) {
+  const tokens = text.trim().toUpperCase().replace(/[,]+/g, ' ').split(/\s+/).filter(Boolean);
+  return tokens.map(t => {
+    if (t.length !== 2) throw new Error(`Invalid card: ${t}`);
+    const r = t[0], s = t[1].toLowerCase();
+    if (!(r in RANK_CHAR_TO_INT)) throw new Error(`Invalid rank: ${r}`);
+    if (!(s in SUIT_CHAR_TO_INT)) throw new Error(`Invalid suit: ${s}`);
+    return { rank: RANK_CHAR_TO_INT[r], suit: SUIT_CHAR_TO_INT[s], str: r + s.toLowerCase() };
+  });
+}
+
+function canonicalizeBoard(cards) {
+  const rs = cards.map(c => [c.rank, c.suit]).sort((a,b) => a[0]-b[0] || a[1]-b[1]);
+  const suitMap = {};
+  let nextS = 0;
+  for (const [r, s] of rs) {
+    if (!(s in suitMap)) suitMap[s] = nextS++;
+  }
+  for (const s of TREYS_SUITS_SORTED) {
+    if (!(s in suitMap)) suitMap[s] = nextS++;
+  }
+  const canon = rs.map(([r, s]) => [r, suitMap[s]]).sort((a,b) => a[0]-b[0] || a[1]-b[1]);
+  return { key: canon.map(p => p[0]+','+p[1]).join('|'), suitMap };
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Auto-detect street from board input
+document.getElementById('board-input').addEventListener('input', function() {
+  const val = this.value.trim();
+  const sel = document.getElementById('street-select');
+  if (!val) { sel.value = 'preflop'; }
+  else {
+    const n = val.split(/\s+/).filter(Boolean).length;
+    if (n === 4) sel.value = 'turn';
+    else if (n >= 5) sel.value = 'river';
+    else sel.value = 'preflop'; // flop not yet supported
+  }
+});
+
+// ── Ranking lookup ────────────────────────────────────────────────────────
+
+async function lookupRanking() {
+  const boardText = document.getElementById('board-input').value.trim();
+  const street = document.getElementById('street-select').value;
+  const statusEl = document.getElementById('ranking-status');
+  const resultEl = document.getElementById('ranking-result');
+  const gridEl = document.getElementById('ranking-grid');
+
+  resultEl.innerHTML = '';
+  gridEl.innerHTML = '';
+
+  try {
+    let ranking;
+
+    if (street === 'preflop') {
+      statusEl.textContent = 'Loading preflop data...';
+      const data = await ensureData('sdPreflop', 'data/sd_preflop.json');
+      // data is array of [hand, ae_norm, ae_rank, raw_eq, raw_rank]
+      ranking = data.map((row, i) => ({
+        hand: row[0], value: row[1], rank: i + 1, combos: null
+      }));
+      statusEl.textContent = 'Short Deck preflop ranking (Action Equity, 1M iterations per hand)';
+
+    } else if (street === 'turn') {
+      if (!boardText) { statusEl.innerHTML = '<span class="error">Enter 4 board cards for turn</span>'; return; }
+      const cards = parseCards(boardText);
+      if (cards.length !== 4) { statusEl.innerHTML = '<span class="error">Turn needs exactly 4 cards</span>'; return; }
+      // Validate short deck
+      if (cards.some(c => c.rank < 4)) { statusEl.innerHTML = '<span class="error">Short deck only: cards 6 through A</span>'; return; }
+
+      statusEl.textContent = 'Loading turn data (1.3 MB)...';
+      const data = await ensureData('sdTurns', 'data/sd_turns.json');
+      const { key } = canonicalizeBoard(cards);
+      const boardData = data[key];
+      if (!boardData) { statusEl.innerHTML = '<span class="error">Board not found in data</span>'; return; }
+
+      ranking = boardData.map((row, i) => ({
+        hand: row[0], value: row[1], rank: i + 1, combos: row[2]
+      }));
+      statusEl.textContent = `Turn ranking for ${boardText} (Action Equity)`;
+
+    } else if (street === 'river') {
+      if (!boardText) { statusEl.innerHTML = '<span class="error">Enter 5 board cards for river</span>'; return; }
+      const cards = parseCards(boardText);
+      if (cards.length !== 5) { statusEl.innerHTML = '<span class="error">River needs exactly 5 cards</span>'; return; }
+      if (cards.some(c => c.rank < 4)) { statusEl.innerHTML = '<span class="error">Short deck only: cards 6 through A</span>'; return; }
+
+      statusEl.textContent = 'Loading river data (3.5 MB)...';
+      const data = await ensureData('sdRivers', 'data/sd_rivers.json');
+      const { key } = canonicalizeBoard(cards);
+      const boardData = data[key];
+      if (!boardData) { statusEl.innerHTML = '<span class="error">Board not found in data</span>'; return; }
+
+      ranking = boardData.map((row, i) => ({
+        hand: row[0], value: row[1], rank: i + 1, combos: row[2]
+      }));
+      statusEl.textContent = `River ranking for ${boardText} (hand strength)`;
+    }
+
+    renderRanking(ranking, resultEl);
+    renderGrid(ranking, gridEl, SD_RANKS, 100);
+
+  } catch (e) {
+    statusEl.innerHTML = `<span class="error">${e.message}</span>`;
+  }
+}
+
+// ── VS Range lookup ───────────────────────────────────────────────────────
+
+async function lookupVsRange() {
+  const heroText = document.getElementById('hero-input').value.trim();
+  const boardText = document.getElementById('vr-board-input').value.trim();
+  const statusEl = document.getElementById('vr-status');
+  const resultEl = document.getElementById('vr-result');
+  const gridEl = document.getElementById('vr-grid');
+
+  resultEl.innerHTML = '';
+  gridEl.innerHTML = '';
+
+  if (!heroText) { statusEl.innerHTML = '<span class="error">Enter hero hand</span>'; return; }
+
+  try {
+    const heroCards = parseCards(heroText);
+    if (heroCards.length !== 2) { statusEl.innerHTML = '<span class="error">Hero needs exactly 2 cards</span>'; return; }
+
+    const heroLabel = getHandLabel(heroCards[0], heroCards[1]);
+    let ranking;
+    let street;
+
+    if (!boardText) {
+      street = 'preflop';
+      statusEl.textContent = 'Loading preflop data...';
+      const data = await ensureData('sdPreflop', 'data/sd_preflop.json');
+      ranking = data.map((row, i) => ({
+        hand: row[0], value: row[1], rank: i + 1, combos: null
+      }));
+    } else {
+      const boardCards = parseCards(boardText);
+      if (boardCards.some(c => c.rank < 4)) { statusEl.innerHTML = '<span class="error">Short deck only</span>'; return; }
+
+      if (boardCards.length === 4) {
+        street = 'turn';
+        statusEl.textContent = 'Loading turn data...';
+        const data = await ensureData('sdTurns', 'data/sd_turns.json');
+        const { key } = canonicalizeBoard(boardCards);
+        const boardData = data[key];
+        if (!boardData) { statusEl.innerHTML = '<span class="error">Board not found</span>'; return; }
+        ranking = boardData.map((row, i) => ({
+          hand: row[0], value: row[1], rank: i + 1, combos: row[2]
+        }));
+      } else if (boardCards.length === 5) {
+        street = 'river';
+        statusEl.textContent = 'Loading river data...';
+        const data = await ensureData('sdRivers', 'data/sd_rivers.json');
+        const { key } = canonicalizeBoard(boardCards);
+        const boardData = data[key];
+        if (!boardData) { statusEl.innerHTML = '<span class="error">Board not found</span>'; return; }
+        ranking = boardData.map((row, i) => ({
+          hand: row[0], value: row[1], rank: i + 1, combos: row[2]
+        }));
+      } else {
+        statusEl.innerHTML = '<span class="error">Board must be 4 (turn) or 5 (river) cards</span>';
+        return;
+      }
+    }
+
+    const rangeMin = parseInt(document.getElementById('range-min').value);
+    const rangeMax = parseInt(document.getElementById('range-max').value);
+
+    // Find hero in ranking
+    const heroEntry = ranking.find(r => r.hand === heroLabel);
+    const heroRank = heroEntry ? heroEntry.rank : null;
+    const heroValue = heroEntry ? heroEntry.value : null;
+    const total = ranking.length;
+    const heroPct = heroRank ? ((heroRank / total) * 100).toFixed(1) : '?';
+
+    // Determine range boundaries
+    const minIdx = Math.floor(rangeMin / 100 * total);
+    const maxIdx = Math.ceil(rangeMax / 100 * total);
+
+    // Build result
+    let html = '<div class="vs-range-results">';
+    html += `<div class="hero-info">Hero: <strong>${heroLabel}</strong>`;
+    if (heroRank) {
+      html += ` &mdash; Rank ${heroRank}/${total} (top ${heroPct}%)`;
+      const cls = heroValue > 0 ? 'good' : heroValue < 0 ? 'bad' : 'neutral';
+      html += ` <span class="metric ${cls}">${street === 'river' ? 'Pct' : 'AE'}: ${heroValue > 0 ? '+' : ''}${heroValue.toFixed(4)}</span>`;
+    } else {
+      html += ' <span class="metric neutral">Not found on this board</span>';
+    }
+    html += '</div>';
+
+    // Opponent range info
+    const oppHands = ranking.slice(minIdx, maxIdx);
+    html += `<div>Opponent range: top ${rangeMin}% to ${rangeMax}% (${oppHands.length} hands)</div>`;
+
+    if (heroRank) {
+      const heroBeats = oppHands.filter(h => h.rank > heroRank).length;
+      const heroLoses = oppHands.filter(h => h.rank < heroRank).length;
+      const heroTies = oppHands.filter(h => h.rank === heroRank).length;
+      const winRate = oppHands.length > 0 ? ((heroBeats + heroTies * 0.5) / oppHands.length * 100).toFixed(1) : 0;
+      html += `<div style="margin-top:8px">`;
+      html += `<span class="metric good">Beats: ${heroBeats}</span> `;
+      html += `<span class="metric bad">Loses to: ${heroLoses}</span> `;
+      if (heroTies > 0) html += `<span class="metric neutral">Ties: ${heroTies}</span> `;
+      html += `<span class="metric ${parseFloat(winRate) >= 50 ? 'good' : 'bad'}">Win rate: ${winRate}%</span>`;
+      html += `</div>`;
+    }
+
+    html += '</div>';
+    resultEl.innerHTML = html;
+
+    // Render grid with range highlighted
+    renderGrid(ranking, gridEl, SD_RANKS, rangeMax, rangeMin);
+    statusEl.textContent = `${street.charAt(0).toUpperCase() + street.slice(1)} ranking — hero: ${heroLabel}`;
+
+  } catch (e) {
+    statusEl.innerHTML = `<span class="error">${e.message}</span>`;
+  }
+}
+
+// Sync range sliders
+document.getElementById('range-min').addEventListener('input', function() {
+  const max = document.getElementById('range-max');
+  if (parseInt(this.value) > parseInt(max.value)) max.value = this.value;
+  document.getElementById('range-min-label').textContent = this.value + '%';
+});
+document.getElementById('range-max').addEventListener('input', function() {
+  const min = document.getElementById('range-min');
+  if (parseInt(this.value) < parseInt(min.value)) min.value = this.value;
+  document.getElementById('range-max-label').textContent = this.value + '%';
+});
+
+// ── Rendering helpers ─────────────────────────────────────────────────────
+
+function getHandLabel(c1, c2) {
+  let r1 = c1.rank, s1 = c1.suit, r2 = c2.rank, s2 = c2.suit;
+  if (r1 < r2) { [r1, s1, r2, s2] = [r2, s2, r1, s1]; }
+  const RANK_INT_TO_CHAR = {12:'A',11:'K',10:'Q',9:'J',8:'T',7:'9',6:'8',5:'7',4:'6',3:'5',2:'4',1:'3',0:'2'};
+  const ch1 = RANK_INT_TO_CHAR[r1], ch2 = RANK_INT_TO_CHAR[r2];
+  if (r1 === r2) return ch1 + ch2;
+  return s1 === s2 ? ch1 + ch2 + 's' : ch1 + ch2 + 'o';
+}
+
+function handCssClass(label) {
+  if (label.length === 2) return 'pair';
+  return label.endsWith('s') ? 'suited' : 'offsuit';
+}
+
+function renderRanking(ranking, container) {
+  let html = '<table class="ranking-table"><thead><tr>';
+  html += '<th class="rank-col">#</th><th class="hand-col">Hand</th><th>Value</th>';
+  if (ranking[0].combos !== null) html += '<th>Combos</th>';
+  html += '</tr></thead><tbody>';
+
+  for (const r of ranking) {
+    const cls = handCssClass(r.hand);
+    html += `<tr><td class="rank-col">${r.rank}</td>`;
+    html += `<td class="hand-col ${cls}">${r.hand}</td>`;
+    html += `<td>${r.value > 0 ? '+' : ''}${r.value.toFixed(4)}</td>`;
+    if (r.combos !== null) html += `<td>${r.combos}</td>`;
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderGrid(ranking, container, ranks, rangePctMax, rangePctMin = 0) {
+  const n = ranks.length;
+  const gridClass = n === 9 ? 'grid-9' : 'grid-13';
+
+  // Build lookup: label -> { rank, total }
+  const lookup = {};
+  const total = ranking.length;
+  for (const r of ranking) {
+    lookup[r.hand] = r;
+  }
+
+  let html = `<h3>Hand Grid (range: ${rangePctMin}%-${rangePctMax}%)</h3>`;
+  html += `<div class="hand-grid ${gridClass}">`;
+
+  for (let row = 0; row < n; row++) {
+    for (let col = 0; col < n; col++) {
+      const r1 = ranks[row], r2 = ranks[col];
+      let label;
+      if (row === col) label = r1 + r2;
+      else if (row < col) label = r1 + r2 + 's';  // above diagonal = suited
+      else label = r2 + r1 + 'o';  // below diagonal = offsuit
+
+      const entry = lookup[label];
+      const pct = entry ? (entry.rank / total * 100) : 100;
+      const inRange = pct >= rangePctMin && pct <= rangePctMax;
+
+      // Color by strength
+      const strength = entry ? (1 - entry.rank / total) : 0;
+      const hue = strength * 120; // 0=red, 120=green
+      const sat = 60;
+      const lum = inRange ? 30 : 15;
+      const bg = `hsl(${hue}, ${sat}%, ${lum}%)`;
+
+      const cls = handCssClass(label);
+      html += `<div class="grid-cell ${inRange ? 'in-range' : 'out-range'} ${cls}" `
+            + `style="background:${bg}" `
+            + `title="${label}: rank ${entry ? entry.rank : '?'}/${total} (${pct.toFixed(1)}%)">`
+            + `${label}</div>`;
+    }
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ── Initial load ──────────────────────────────────────────────────────────
+
+// Pre-load preflop data (tiny) and show default
+(async function() {
+  try {
+    await ensureData('sdPreflop', 'data/sd_preflop.json');
+    lookupRanking(); // show preflop by default
+  } catch(e) {
+    document.getElementById('ranking-status').innerHTML =
+      '<span class="error">Failed to load data. Make sure data/ files exist.</span>';
+  }
+})();
+</script>
+
+</body>
+</html>
