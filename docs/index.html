@@ -74,7 +74,9 @@ button:disabled { background: #555; cursor: not-allowed; }
 .progress-bar { width: 100%; height: 4px; background: #16213e; border-radius: 2px; margin-top: 8px; overflow: hidden; }
 .progress-fill { height: 100%; background: #e94560; transition: width 0.1s; }
 .dual-range { pointer-events: none; }
-.dual-range::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #e94560; cursor: pointer; position: relative; z-index: 2; }
+.dual-range::-webkit-slider-runnable-track { height: 6px; background: transparent; }
+.dual-range::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #e94560; cursor: pointer; position: relative; z-index: 2; margin-top: -5px; }
+.dual-range::-moz-range-track { height: 6px; background: transparent; }
 .dual-range::-moz-range-thumb { pointer-events: auto; width: 16px; height: 16px; border-radius: 50%; background: #e94560; cursor: pointer; border: none; }
 </style>
 </head>
@@ -139,11 +141,11 @@ button:disabled { background: #555; cursor: not-allowed; }
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <span style="color:#a0a0a0;font-size:0.9rem">Opponent range:</span>
         <span id="range-min-label" style="min-width:30px;text-align:right">0%</span>
-        <div style="flex:1;min-width:200px;position:relative;height:28px">
-          <input type="range" id="range-min" min="0" max="100" value="0" step="1" oninput="syncSliders()" style="position:absolute;width:100%;top:2px;pointer-events:none;-webkit-appearance:none;background:transparent" class="dual-range">
-          <input type="range" id="range-max" min="0" max="100" value="100" step="1" oninput="syncSliders()" style="position:absolute;width:100%;top:2px;pointer-events:none;-webkit-appearance:none;background:transparent" class="dual-range">
-          <div id="range-track" style="position:absolute;top:10px;height:6px;background:#0f3460;border-radius:3px;width:100%"></div>
-          <div id="range-fill" style="position:absolute;top:10px;height:6px;background:#e94560;border-radius:3px;left:0%;width:100%"></div>
+        <div style="flex:1;min-width:200px;position:relative;height:20px">
+          <div id="range-track" style="position:absolute;top:7px;height:6px;background:#0f3460;border-radius:3px;width:100%"></div>
+          <div id="range-fill" style="position:absolute;top:7px;height:6px;background:#e94560;border-radius:3px;left:0%;width:100%"></div>
+          <input type="range" id="range-min" min="0" max="100" value="0" step="1" oninput="syncSliders()" style="position:absolute;width:100%;top:0;margin:0;pointer-events:none;-webkit-appearance:none;background:transparent;height:20px" class="dual-range">
+          <input type="range" id="range-max" min="0" max="100" value="100" step="1" oninput="syncSliders()" style="position:absolute;width:100%;top:0;margin:0;pointer-events:none;-webkit-appearance:none;background:transparent;height:20px" class="dual-range">
         </div>
         <span id="range-max-label" style="min-width:35px">100%</span>
       </div>
@@ -618,6 +620,10 @@ async function runVsRange() {
     const heroCardIds=new Set(heroCards.map(cardId));
 
     let fixedBoard=[];
+    if (boardText && simSpeed !== 'exhaustive') {
+      // Auto-switch to exhaustive when board is given
+      try { if (parseCards(boardText).length >= 3) { simSpeed='exhaustive'; document.querySelectorAll('.speed-btn').forEach(b=>b.classList.toggle('active',b.dataset.speed==='exhaustive')); } } catch(e) {}
+    }
     if (boardText) {
       fixedBoard=parseCards(boardText);
       if (fixedBoard.length>5) fixedBoard=fixedBoard.slice(0,5);
@@ -650,9 +656,9 @@ async function runVsRange() {
     const doExhaustive = isExhaustive && boardsToRun !== undefined && boardsToRun > 0 && boardsToRun <= 600;
     const numBoards = doExhaustive ? boardsToRun : {fast:500,medium:3000,slow:15000,exhaustive:15000}[simSpeed];
 
-    statusEl.textContent = doExhaustive
-      ? `Running exhaustive: ${boardsToRun} board${boardsToRun>1?'s':''}... (loading board data)`
-      : `Simulating ${numBoards} boards... (loading board data, first run may be slower)`;
+    statusEl.innerHTML = doExhaustive
+      ? `Running exhaustive: ${boardsToRun} board${boardsToRun>1?'s':''}... <b style="text-decoration:underline">First run loads board data and may be slower.</b>`
+      : `Simulating ${numBoards} boards... <b style="text-decoration:underline">First run loads board data and may be slower.</b>`;
     progressBar.style.display='block'; progressFill.style.width='0%';
     document.getElementById('sim-btn').disabled=true;
     await new Promise(r=>setTimeout(r,20));
