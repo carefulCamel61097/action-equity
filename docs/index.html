@@ -73,6 +73,9 @@ button:disabled { background: #555; cursor: not-allowed; }
 .subtitle { text-align: center; color: #888; margin-bottom: 16px; font-size: 0.9rem; }
 .progress-bar { width: 100%; height: 4px; background: #16213e; border-radius: 2px; margin-top: 8px; overflow: hidden; }
 .progress-fill { height: 100%; background: #e94560; transition: width 0.1s; }
+.dual-range { pointer-events: none; }
+.dual-range::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #e94560; cursor: pointer; position: relative; z-index: 2; }
+.dual-range::-moz-range-thumb { pointer-events: auto; width: 16px; height: 16px; border-radius: 50%; background: #e94560; cursor: pointer; border: none; }
 </style>
 </head>
 <body>
@@ -105,8 +108,8 @@ button:disabled { background: #555; cursor: not-allowed; }
       <button onclick="lookupRanking()">Look Up</button>
       <button class="btn-secondary btn-small" onclick="randomBoard()">Random</button>
       <div class="street-toggle" id="view-toggle" style="margin-left:auto">
-        <button class="street-btn active" data-view="grouped" onclick="setView(this)">Grouped</button>
-        <button class="street-btn" data-view="full" onclick="setView(this)">All combos</button>
+        <button class="street-btn" data-view="grouped" onclick="setView(this)">Grouped</button>
+        <button class="street-btn active" data-view="full" onclick="setView(this)">All combos</button>
       </div>
     </div>
     <div id="card-display" class="card-display"></div>
@@ -122,8 +125,9 @@ button:disabled { background: #555; cursor: not-allowed; }
       <label>Hero:</label>
       <input type="text" id="hero-input" placeholder="e.g. AhKd" style="width:120px">
       <label>Board:</label>
-      <input type="text" id="vr-board-input" placeholder="optional">
+      <input type="text" id="vr-board-input" placeholder="optional, e.g. Qh Jc 3s">
       <button id="sim-btn" onclick="runVsRange()">Simulate</button>
+      <button class="btn-secondary btn-small" onclick="randomVrFlop()">Random Flop</button>
       <div class="speed-toggle" id="speed-toggle">
         <button class="speed-btn" data-speed="fast" onclick="setSpeed(this)">Fast (500)</button>
         <button class="speed-btn active" data-speed="medium" onclick="setSpeed(this)">Medium (3k)</button>
@@ -131,13 +135,22 @@ button:disabled { background: #555; cursor: not-allowed; }
         <button class="speed-btn" data-speed="exhaustive" onclick="setSpeed(this)">Exhaustive</button>
       </div>
     </div>
-    <div class="slider-row">
-      <span>Opponent range:</span>
-      <span id="range-min-label">0%</span>
-      <input type="range" id="range-min" min="0" max="100" value="0" step="1" oninput="syncSliders()">
-      <span>to</span>
-      <input type="range" id="range-max" min="0" max="100" value="100" step="1" oninput="syncSliders()">
-      <span id="range-max-label">100%</span>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="color:#a0a0a0;font-size:0.9rem">Opponent range:</span>
+        <span id="range-min-label" style="min-width:30px;text-align:right">0%</span>
+        <div style="flex:1;min-width:200px;position:relative;height:28px">
+          <input type="range" id="range-min" min="0" max="100" value="0" step="1" oninput="syncSliders()" style="position:absolute;width:100%;top:2px;pointer-events:none;-webkit-appearance:none;background:transparent" class="dual-range">
+          <input type="range" id="range-max" min="0" max="100" value="100" step="1" oninput="syncSliders()" style="position:absolute;width:100%;top:2px;pointer-events:none;-webkit-appearance:none;background:transparent" class="dual-range">
+          <div id="range-track" style="position:absolute;top:10px;height:6px;background:#0f3460;border-radius:3px;width:100%"></div>
+          <div id="range-fill" style="position:absolute;top:10px;height:6px;background:#e94560;border-radius:3px;left:0%;width:100%"></div>
+        </div>
+        <span id="range-max-label" style="min-width:35px">100%</span>
+      </div>
+      <div style="color:#666;font-size:0.78rem;margin-top:6px">
+        Percentile from our preflop Action Equity ranking. 0% = strongest hands (AA, KK...), 100% = weakest.
+        The simulation deals random boards and computes Action Equity of your hero hand against each opponent hand in the range.
+      </div>
     </div>
     <div id="vr-status" class="status"></div>
     <div id="vr-progress" class="progress-bar" style="display:none"><div class="progress-fill" id="vr-progress-fill"></div></div>
@@ -149,7 +162,7 @@ button:disabled { background: #555; cursor: not-allowed; }
 </div>
 
 <script>
-let currentVariant = 'sd', currentStreet = 'preflop', simSpeed = 'medium', viewMode = 'grouped';
+let currentVariant = 'sd', currentStreet = 'preflop', simSpeed = 'medium', viewMode = 'full';
 let lastRankingData = null, lastBoardCards = null, lastIsRiver = false;
 const SD_RANKS = 'AKQJT9876', STD_RANKS = 'AKQJT98765432', SUIT_CHARS = 'shdc';
 const RANK_CHARS = () => currentVariant === 'sd' ? SD_RANKS : STD_RANKS;
@@ -399,6 +412,16 @@ function syncSliders() {
   if (parseInt(mn.value)>parseInt(mx.value)) { if (document.activeElement===mn) mx.value=mn.value; else mn.value=mx.value; }
   document.getElementById('range-min-label').textContent=mn.value+'%';
   document.getElementById('range-max-label').textContent=mx.value+'%';
+  const fill=document.getElementById('range-fill');
+  if (fill) { fill.style.left=mn.value+'%'; fill.style.width=(mx.value-mn.value)+'%'; }
+}
+
+function randomVrFlop() {
+  const heroText=document.getElementById('hero-input').value.trim();
+  const heroIds=new Set();
+  try { parseCards(heroText).forEach(c=>heroIds.add(cardId(c))); } catch(e) {}
+  const deck=shuffle(buildDeck().filter(c=>!heroIds.has(cardId(c))));
+  document.getElementById('vr-board-input').value=deck.slice(0,3).map(c=>cardStr(c)).join(' ');
 }
 
 document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
@@ -618,9 +641,11 @@ async function runVsRange() {
     const doExhaustive = isExhaustive && boardsToRun !== undefined && boardsToRun > 0 && boardsToRun <= 600;
     const numBoards = doExhaustive ? boardsToRun : {fast:500,medium:3000,slow:15000,exhaustive:15000}[simSpeed];
 
+    const loadingNote = Object.keys(DATA).filter(k=>k.startsWith('sd_rivers_')).length < 10
+      ? ' (first run loads data, subsequent runs are faster)' : '';
     statusEl.textContent = doExhaustive
-      ? `Running exhaustive: ${boardsToRun} board${boardsToRun>1?'s':''}...`
-      : `Simulating ${numBoards} boards...`;
+      ? `Running exhaustive: ${boardsToRun} board${boardsToRun>1?'s':''}...${loadingNote}`
+      : `Simulating ${numBoards} boards...${loadingNote}`;
     progressBar.style.display='block'; progressFill.style.width='0%';
     document.getElementById('sim-btn').disabled=true;
     await new Promise(r=>setTimeout(r,20));
@@ -708,7 +733,10 @@ async function runVsRange() {
 
     const pfRanking=preflopData.map((r,i)=>({label:r[0],avgValue:r[1],rank:i+1,totalCombos:null,combos:null}));
     renderGrid(pfRanking,gridEl,ranks,rangeMax,rangeMin,true);
-    statusEl.textContent=`${heroLabel} vs ${rangeMin}%-${rangeMax}% (${boardsUsed} boards)`;
+    gridEl.innerHTML+='<div style="color:#666;font-size:0.75rem;margin-top:6px">Grid colors: preflop Action Equity (green = positive, red = negative). Highlighted = opponent range.</div>';
+    statusEl.textContent = doExhaustive
+      ? `${heroLabel} vs ${rangeMin}%-${rangeMax}% (exhaustive, ${boardsUsed} boards)`
+      : `${heroLabel} vs ${rangeMin}%-${rangeMax}% (${boardsUsed} boards)`;
   } catch(e) {
     document.getElementById('sim-btn').disabled=false;
     progressBar.style.display='none';
@@ -792,8 +820,18 @@ function renderGrid(ranking, container, ranks, pctMax, pctMin=0, useEV=true) {
 
 // ── Init ───────────────────────────────────────────────────────────
 (async()=>{
-  try { await ensureData('sdPreflop','data/sd_preflop.json'); await ensureData('stdPreflop','data/std_preflop.json'); lookupRanking(); }
-  catch(e) { document.getElementById('ranking-status').innerHTML='<span class="error">Failed to load data</span>'; }
+  try {
+    await ensureData('sdPreflop','data/sd_preflop.json');
+    await ensureData('stdPreflop','data/std_preflop.json');
+    lookupRanking();
+    // Preload common river chunks in background for faster first VS Range simulation
+    setTimeout(()=>{
+      const common = ['67','68','78','69','79','89','6t','7t','8t','9t'];
+      for (const ck of common) {
+        ensureData('sd_rivers_'+ck, 'data/sd_rivers_'+ck+'.json').catch(()=>{});
+      }
+    }, 1000);
+  } catch(e) { document.getElementById('ranking-status').innerHTML='<span class="error">Failed to load data</span>'; }
 })();
 </script>
 </body>
