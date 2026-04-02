@@ -52,6 +52,10 @@ In real poker, this doesn't happen. To see the flop, 66 has to call a raise. On 
 
 This is the clearest example of Action Equity's limitation: **hands that are weak most of the time but occasionally very strong are overvalued**, because our model doesn't charge them for the many streets of betting they'd need to survive to reach showdown.
 
+### Future work: fold model
+
+A natural extension would simulate folding at each street. If the percentile gap between hero and opponent exceeds a threshold, the weaker hand folds and the stronger hand wins the current pot. The pot grows at each street based on bet sizing (e.g. 33% pot on flop, 66% on turn, 75% on river). This would penalize hands like small pocket pairs that need to survive multiple streets to realize their equity.
+
 ## What Changes in the Rankings?
 
 ### Standard Hold'em (52 cards)
@@ -99,9 +103,9 @@ Every possible short deck board has been ranked. For any flop, turn, or river yo
 | Data | Total Boards | Canonical | Status |
 |------|-----:|------:|------|
 | Preflop ranking | -- | 169 hands | Done (1M iterations, stratified) |
-| All river rankings | 2,598,960 | ~134,459 | Ready to run |
-| All turn rankings | 270,725 | ~16,432 | Ready to run |
-| All flop rankings | 22,100 | ~1,833 | Ready to run |
+| All river rankings | 2,598,960 | ~134,459 | In progress |
+| All turn rankings | 270,725 | ~16,432 | In progress |
+| All flop rankings | 22,100 | ~1,833 | In progress |
 
 ### Preflop Rankings
 
@@ -111,15 +115,20 @@ Preflop rankings use stratified opponent sampling with 1 million iterations per 
 
 The **[interactive tools page](https://carefulcamel61097.github.io/action-equity/)** lets you:
 
-- **Look up rankings** on any board (preflop, flop, turn, or river) for both standard and short deck
-- **Explore ranges** by percentile with a visual 9x9 / 13x13 hand grid
-- **Simulate your hand** against opponent ranges to calculate Action Equity in real time
+- **Look up rankings** on any short deck board (preflop, flop, turn, or river)
+- **View all suit combinations** separately -- see how Jc Tc (flush draw) differs from Js Ts (off-board suits) on the same board
+- **Explore ranges** by percentile with a visual 9x9 hand grid
+- **Simulate your hand** against opponent ranges to calculate Action Equity, with exhaustive mode for boards with 3+ cards
 
 ## Technical Details
 
-### Isomorphic Board Canonicalization
+### Suit Frequency Group Canonicalization
 
-We canonicalize boards by remapping suits in order of first appearance. As Kh Qd and Ah Ks Qc are strategically identical -- only the suit *pattern* matters. This reduces computation by ~15x.
+Boards are canonicalized by grouping suits by their frequency on the board. Suits that appear the same number of times are interchangeable -- for example, on a board with two clubs and no spades or hearts, Js Ts and Jh Th are strategically identical (both off-board suited), but Jc Tc is different (flush draw). This reduces the number of unique hand combinations per board by ~42% compared to naive canonicalization, while preserving all strategically meaningful distinctions.
+
+### Chunked Data Storage
+
+Board ranking data is split into chunks by the two lowest card ranks on the board (e.g., all boards with 6 and 7 as the two lowest ranks go into `sd_rivers_67.json`). This keeps individual files small (max ~4 MB compressed) while allowing the web app to load only the data it needs.
 
 ### Stratified Opponent Sampling (Preflop)
 
@@ -130,13 +139,13 @@ For preflop rankings, opponents are grouped into equivalence classes based on su
 Requires Python 3 and the `treys` library (`pip install treys`).
 
 ```bash
-# Preflop rankings (both standard and short deck)
+# Preflop rankings (both standard and short deck, ~overnight on Pi)
 python3 run_all_rankings.py
 
 # Short deck board rankings (all stages, ~14 hours on Pi)
 python3 run_short_deck_boards.py
 
-# Standard deck board rankings
+# Standard deck board rankings (memory-efficient, no inter-stage dependencies)
 python3 run_standard_boards.py --stage 1    # rivers (~3 hrs)
 python3 run_standard_boards.py --stage 2    # turns (~days)
 python3 run_standard_boards.py --stage 3    # flops (~weeks)
@@ -147,18 +156,29 @@ python3 run_standard_boards.py --stage 3    # flops (~weeks)
 ```
 docs/                       GitHub Pages site
   index.html                Interactive tools
-  data/                     JSON data for the site
+  data/                     Chunked JSON data for the site
+    sd_rivers_*.json        Short deck river rankings (36 chunks)
+    sd_turns_*.json         Short deck turn rankings (45 chunks)
+    sd_flops_*.json         Short deck flop rankings (45 chunks)
+    sd_preflop.json         Short deck preflop ranking
+    std_preflop.json        Standard preflop ranking
 
 results/                    Pre-computed ranking data
   rankings.csv              Standard preflop (raw + action equity)
   rankings_short_deck.csv   Short deck preflop
   sd_results_*.csv          Short deck board rankings (aggregated)
-  sd_stage*.pkl             Per-board caches (gitignored, regenerable)
+  *.pkl                     Per-board caches (gitignored, regenerable)
+
+archive/                    Unused/experimental results
 
 evaluator.py                Standard + Short Deck hand evaluators
 simulation.py               Single hand equity calculator
+simulation_streets.py       Street-by-street pot model simulation
+simulation_vs_range.py      Hand vs opponent range simulation
 rank_all_hands.py           Preflop ranking with stratified sampling
 rank_board.py               Single board ranking
-run_short_deck_boards.py    All short deck board rankings
-run_standard_boards.py      All standard board rankings
+run_short_deck_boards.py    All short deck board rankings (4 stages)
+run_standard_boards.py      All standard board rankings (3 stages, memory-efficient)
+run_all_rankings.py         Preflop ranking batch script
+convert_to_json.py          Pickle to chunked JSON converter
 ```
