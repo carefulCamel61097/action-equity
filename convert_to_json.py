@@ -224,8 +224,16 @@ def convert_preflop(csv_name, out_name):
 
 
 if __name__ == "__main__":
-    convert_board_data_chunked("sd_stage1_rivers.pkl", "sd_rivers", "river")
-    convert_board_data_chunked("sd_stage2_turns.pkl", "sd_turns", "turn")
-    convert_preflop("rankings_short_deck.csv", "sd_preflop.json")
-    convert_preflop("rankings.csv", "std_preflop.json")
+    import sys
+    only = sys.argv[1] if len(sys.argv) > 1 else None
+
+    if not only or only == "rivers":
+        convert_board_data_chunked("sd_stage1_rivers.pkl", "sd_rivers", "river")
+    if not only or only == "turns":
+        convert_board_data_chunked("sd_stage2_turns.pkl", "sd_turns", "turn")
+    if not only or only == "flops":
+        convert_board_data_chunked("sd_stage3_flops.pkl", "sd_flops", "turn")  # same format as turns
+    if not only or only == "preflop":
+        convert_preflop("rankings_short_deck.csv", "sd_preflop.json")
+        convert_preflop("rankings.csv", "std_preflop.json")
     print("\nDone.")

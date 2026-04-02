@@ -472,7 +472,7 @@ async function loadBoardRanking(cards, street) {
   const isSD = currentVariant === 'sd';
   if (!isSD) throw new Error('Standard deck board data not yet available');
 
-  const prefix = street === 'turn' ? 'sd_turns' : 'sd_rivers';
+  const prefix = street === 'flop' ? 'sd_flops' : street === 'turn' ? 'sd_turns' : 'sd_rivers';
   const ck = chunkKey(cards);
   const dataKey = prefix + '_' + ck;
   const url = 'data/' + dataKey + '.json';
@@ -548,7 +548,7 @@ async function lookupRanking() {
       allCards.forEach((c,i)=>{dhtml+=`<span class="${i<need?'used':'unused'}">${cardStr(c)}</span> `;});
       displayEl.innerHTML=dhtml;
 
-      if (street==='flop') {statusEl.innerHTML='<span class="error">Flop data coming soon</span>';return;}
+      if (street==='flop' && !isSD) {statusEl.innerHTML='<span class="error">Standard deck flop data not yet available</span>';return;}
 
       isRiver = street==='river';
       const sizeHint = street==='turn'?'~0.5 MB':'~3 MB';
