@@ -772,14 +772,16 @@ async function runVsRange() {
 
 function renderFullRanking(entries, container, isRiver) {
   const valLabel = isRiver ? 'Percentile' : 'Action Equity';
+  const total = entries.length;
   let html='<table class="ranking-table"><thead><tr>';
-  html+=`<th class="rank-col">#</th><th class="hand-col">Hand</th><th class="hand-col">Cards</th><th>${valLabel}</th>`;
+  html+=`<th class="rank-col">#</th><th class="hand-col">Hand</th><th class="hand-col">Cards</th><th>${valLabel}</th><th>Top %</th>`;
   html+='</tr></thead><tbody>';
   for (const e of entries) {
     const cls = handCssClass(e.label);
     const val = isRiver ? (e.value*100).toFixed(1)+'%' : (e.value>0?'+':'')+e.value.toFixed(4);
+    const pct = (e.rank / total * 100).toFixed(1) + '%';
     html+=`<tr><td class="rank-col">${e.rank}</td><td class="hand-col ${cls}">${e.label}</td>`;
-    html+=`<td>${e.hand}</td><td>${val}</td></tr>`;
+    html+=`<td>${e.hand}</td><td>${val}</td><td>${pct}</td></tr>`;
   }
   html+='</tbody></table>';
   container.innerHTML=html;
@@ -788,15 +790,17 @@ function renderFullRanking(entries, container, isRiver) {
 function renderRanking(ranking, container, isRiver, groupDescs) {
   const valLabel = isRiver ? 'Percentile' : 'Action Equity';
   const hasBoard = ranking[0] && ranking[0].combos;
+  const total = ranking.length;
   let html='<table class="ranking-table"><thead><tr>';
-  html+=`<th class="rank-col">#</th><th class="hand-col">Hand</th><th>${valLabel}</th>`;
+  html+=`<th class="rank-col">#</th><th class="hand-col">Hand</th><th>${valLabel}</th><th>Top %</th>`;
   if (hasBoard) html+='<th>Combos</th>';
   html+='</tr></thead><tbody>';
 
   for (const r of ranking) {
     const cls = handCssClass(r.label);
     const val = isRiver ? (r.avgValue*100).toFixed(1)+'%' : (r.avgValue>0?'+':'')+r.avgValue.toFixed(4);
-    html+=`<tr><td class="rank-col">${r.rank}</td><td class="hand-col ${cls}">${r.label}</td><td>${val}</td>`;
+    const pct = (r.rank / total * 100).toFixed(1) + '%';
+    html+=`<tr><td class="rank-col">${r.rank}</td><td class="hand-col ${cls}">${r.label}</td><td>${val}</td><td>${pct}</td>`;
     if (hasBoard) html+=`<td>${r.totalCombos}</td>`;
     html+='</tr>';
 
